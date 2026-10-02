@@ -561,63 +561,6 @@ body::before {
 }
 .device-details .full-span { grid-column: 1 / -1; white-space: normal; }
 
-/* FOTO DEL DISPOSITIVO */
-.device-photo {
-    grid-column: 1 / -1;
-    margin: 6px 0;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-}
-.device-photo img {
-    width: 100%; height: 180px;
-    object-fit: cover;
-    display: block;
-    transition: transform .3s ease;
-}
-.device-photo:hover img { transform: scale(1.03); }
-.device-photo .photo-actions {
-    position: absolute; top: 8px; right: 8px;
-    display: flex; gap: 6px;
-    opacity: 0; transition: var(--transition);
-}
-.device-photo:hover .photo-actions { opacity: 1; }
-@media (hover: none) { .device-photo .photo-actions { opacity: 1; } }
-.device-photo .photo-btn {
-    background: rgba(0,0,0,.6); color: white;
-    border: none; border-radius: 8px;
-    width: 32px; height: 32px;
-    cursor: pointer; display: inline-flex;
-    align-items: center; justify-content: center;
-    backdrop-filter: blur(6px);
-    transition: var(--transition);
-}
-.device-photo .photo-btn:hover { background: rgba(0,0,0,.85); transform: scale(1.05); }
-
-.photo-empty {
-    grid-column: 1 / -1;
-    padding: 18px;
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 12px;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 6px 0;
-}
-.photo-empty:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-light);
-}
-
 .device-actions {
     display: flex; flex-wrap: wrap; gap: 8px;
     padding-top: 12px; border-top: 1px solid var(--border-color);
@@ -804,7 +747,6 @@ body::before {
         <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
         <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
         <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
-        <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></symbol>
         <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
         <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
         <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -815,11 +757,8 @@ body::before {
         <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
         <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></symbol>
         <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
-        <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.58 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></symbol>
         <symbol id="i-file-down" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></symbol>
         <symbol id="i-file-x" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9.5 12.5l5 5M14.5 12.5l-5 5"/></symbol>
-        <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
-        <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
     </defs>
 </svg>
 
@@ -1125,24 +1064,6 @@ body::before {
                     <textarea id="observaciones" rows="3" placeholder="Notas adicionales..."></textarea>
                 </div>
 
-                <!-- FOTO -->
-                <div class="form-group full-width">
-                    <label>Foto del Dispositivo</label>
-                    <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none">
-                    <div id="fotoPreviewContainer"></div>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-                        <button type="button" class="btn btn-outline btn-sm" id="btnTomarFoto">
-                            <svg class="icon icon-sm"><use href="#i-camera"/></svg>
-                            Tomar / Seleccionar foto
-                        </button>
-                        <button type="button" class="btn btn-outline btn-sm" id="btnQuitarFoto" style="display:none;">
-                            <svg class="icon icon-sm"><use href="#i-trash"/></svg>
-                            Quitar
-                        </button>
-                    </div>
-                    <span class="error-msg"></span>
-                </div>
-
                 <div class="form-group full-width">
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
@@ -1420,23 +1341,6 @@ body::before {
                     <textarea id="editObservaciones" rows="3"></textarea>
                 </div>
 
-                <!-- FOTO EDITAR -->
-                <div class="form-group full-width">
-                    <label>Foto del Dispositivo</label>
-                    <input type="file" id="editFotoInput" accept="image/*" capture="environment" style="display:none">
-                    <div id="editFotoPreviewContainer"></div>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-                        <button type="button" class="btn btn-outline btn-sm" id="btnEditTomarFoto">
-                            <svg class="icon icon-sm"><use href="#i-camera"/></svg>
-                            Tomar / Cambiar foto
-                        </button>
-                        <button type="button" class="btn btn-outline btn-sm" id="btnEditQuitarFoto" style="display:none;">
-                            <svg class="icon icon-sm"><use href="#i-trash"/></svg>
-                            Quitar
-                        </button>
-                    </div>
-                </div>
-
                 <div class="form-group full-width">
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
@@ -1511,9 +1415,6 @@ body::before {
     let editandoId = null;
     let syncing = false;
     let chartTipo = null, chartEstado = null, chartArea = null, chartUbicacion = null;
-    let fotoNueva = null;         // DataURL para nuevo dispositivo
-    let fotoEditNueva = null;     // DataURL para edición
-    let fotoEditActual = '';      // URL actual en edición
     let notificacionesActivas = false;
 
     // ============================================================
@@ -1597,7 +1498,6 @@ body::before {
             todosDispositivos = Array.isArray(data) ? data : [];
             aplicarFiltros();
             setConnection('online');
-            // Notificar si hay cambios
             if (prev > 0 && todosDispositivos.length !== prev) {
                 const diff = todosDispositivos.length - prev;
                 notificar('Inventario actualizado', diff > 0 ? `+${diff} dispositivo(s) nuevo(s)` : `${diff} dispositivo(s) menos`);
@@ -1667,48 +1567,6 @@ body::before {
     }
 
     // ============================================================
-    // FOTOS
-    // ============================================================
-    function comprimirImagen(file, maxW = 1000, maxH = 1000, quality = 0.78) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    let { width, height } = img;
-                    if (width > maxW || height > maxH) {
-                        const ratio = Math.min(maxW / width, maxH / height);
-                        width = Math.round(width * ratio);
-                        height = Math.round(height * ratio);
-                    }
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.onerror = reject;
-                img.src = e.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function renderFotoPreview(containerId, dataUrl, isEdit) {
-        const c = $(containerId);
-        if (!dataUrl) {
-            c.innerHTML = '';
-            return;
-        }
-        c.innerHTML = `
-            <div class="device-photo" style="margin-top:8px;">
-                <img src="${dataUrl}" alt="Foto">
-            </div>`;
-    }
-
-    // ============================================================
     // HELPERS
     // ============================================================
     function sheetToForm(d) {
@@ -1730,8 +1588,7 @@ body::before {
             ubicacion: d.Ubicacion || '',
             observaciones: d.Observaciones || '',
             fechaAsignacion: d.FechaAsignacion || '',
-            fechaBaja: d.FechaBaja || '',
-            fotoURL: d.FotoURL || ''
+            fechaBaja: d.FechaBaja || ''
         };
     }
 
@@ -1805,17 +1662,7 @@ body::before {
             showToast('Guardando...', 'info');
             const result = await apiPost({ action: 'create', data });
             const folio = result.Folio || 'Dispositivo';
-            // Subir foto si hay
-            if (fotoNueva) {
-                try {
-                    showToast('Subiendo foto...', 'info');
-                    await apiPost({ action: 'uploadFoto', id: folio, foto: fotoNueva });
-                } catch (e) { console.warn('Foto no subida', e); }
-            }
             form.reset();
-            fotoNueva = null;
-            renderFotoPreview('fotoPreviewContainer', null, false);
-            $('btnQuitarFoto').style.display = 'none';
             document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
             toggleCondFields('');
             showToast(`${folio} registrado`, 'success');
@@ -1828,29 +1675,7 @@ body::before {
 
     form.addEventListener('reset', () => {
         document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
-        fotoNueva = null;
-        renderFotoPreview('fotoPreviewContainer', null, false);
-        $('btnQuitarFoto').style.display = 'none';
         setTimeout(() => toggleCondFields(''), 0);
-    });
-
-    // Foto nuevo
-    $('btnTomarFoto').addEventListener('click', () => $('fotoInput').click());
-    $('fotoInput').addEventListener('change', async e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-            showToast('Procesando imagen...', 'info');
-            fotoNueva = await comprimirImagen(file);
-            renderFotoPreview('fotoPreviewContainer', fotoNueva, false);
-            $('btnQuitarFoto').style.display = 'inline-flex';
-        } catch (err) { showToast('Error al procesar imagen', 'error'); }
-    });
-    $('btnQuitarFoto').addEventListener('click', () => {
-        fotoNueva = null;
-        renderFotoPreview('fotoPreviewContainer', null, false);
-        $('btnQuitarFoto').style.display = 'none';
-        $('fotoInput').value = '';
     });
 
     // ============================================================
@@ -1879,12 +1704,6 @@ body::before {
         $('editFechaAsignacion').value = f.fechaAsignacion;
         $('editFechaBaja').value = f.fechaBaja;
 
-        // Foto
-        fotoEditNueva = null;
-        fotoEditActual = f.fotoURL || '';
-        renderFotoPreview('editFotoPreviewContainer', fotoEditActual, true);
-        $('btnEditQuitarFoto').style.display = fotoEditActual ? 'inline-flex' : 'none';
-
         toggleEditCondFields(f.estado);
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -1894,8 +1713,6 @@ body::before {
         modal.classList.remove('active');
         document.body.style.overflow = '';
         editandoId = null;
-        fotoEditNueva = null;
-        fotoEditActual = '';
     }
 
     $('modalCerrar').addEventListener('click', cerrarModal);
@@ -1906,30 +1723,6 @@ body::before {
             if (modal.classList.contains('active')) cerrarModal();
             if ($('modalPlantillas').classList.contains('active')) cerrarModalPlantillas();
         }
-    });
-
-    // Foto edición
-    $('btnEditTomarFoto').addEventListener('click', () => $('editFotoInput').click());
-    $('editFotoInput').addEventListener('change', async e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-            showToast('Procesando imagen...', 'info');
-            fotoEditNueva = await comprimirImagen(file);
-            renderFotoPreview('editFotoPreviewContainer', fotoEditNueva, true);
-            $('btnEditQuitarFoto').style.display = 'inline-flex';
-        } catch (err) { showToast('Error al procesar imagen', 'error'); }
-    });
-    $('btnEditQuitarFoto').addEventListener('click', async () => {
-        if (!confirm('¿Quitar la foto de este dispositivo?')) return;
-        fotoEditNueva = null;
-        fotoEditActual = '';
-        renderFotoPreview('editFotoPreviewContainer', null, true);
-        $('btnEditQuitarFoto').style.display = 'none';
-        try {
-            await apiPost({ action: 'deleteFoto', id: editandoId });
-            showToast('Foto eliminada', 'success');
-        } catch (e) { showToast(e.message, 'error'); }
     });
 
     // ============================================================
@@ -1965,11 +1758,6 @@ body::before {
 
         try {
             showToast('Guardando...', 'info');
-            // Si hay foto nueva, subirla primero
-            if (fotoEditNueva) {
-                showToast('Subiendo foto...', 'info');
-                await apiPost({ action: 'uploadFoto', id: editandoId, foto: fotoEditNueva });
-            }
             await apiPost({ action: 'update', id: editandoId, data });
             cerrarModal();
             showToast('Actualizado', 'success');
@@ -2009,7 +1797,6 @@ body::before {
 
             const folio = d.Folio || d.folio || '';
             const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            const foto = d.FotoURL || '';
 
             return `
                 <div class="device-card" style="animation-delay:${Math.min(idx * 30, 300)}ms" data-id="${esc(folio)}">
@@ -2017,23 +1804,6 @@ body::before {
                         <span class="device-folio">${esc(folio)}</span>
                         <span class="device-status ${statusClass}">${esc(estado)}</span>
                     </div>
-
-                    ${foto ? `
-                        <div class="device-photo">
-                            <img src="${esc(foto)}" alt="Foto ${esc(folio)}" loading="lazy" onerror="this.parentElement.style.display='none'">
-                            <div class="photo-actions">
-                                <button class="photo-btn" onclick="window.open('${esc(foto)}','_blank')" title="Ver foto">
-                                    <svg class="icon icon-sm"><use href="#i-eye"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="photo-empty foto-add" data-id="${esc(folio)}">
-                            <svg class="icon icon-sm"><use href="#i-camera"/></svg>
-                            <span>Agregar foto</span>
-                        </div>
-                    `}
-
                     <div class="device-details">
                         <span><strong>Tipo</strong>${esc(d.Tipo) || 'N/A'}</span>
                         <span><strong>Marca</strong>${esc(d.Marca) || 'N/A'}</span>
@@ -2124,15 +1894,6 @@ body::before {
                 } catch (e) { showToast(e.message, 'error'); }
             });
         });
-
-        // Agregar foto desde tarjeta
-        listaEl.querySelectorAll('.foto-add').forEach(el => {
-            el.addEventListener('click', () => {
-                const id = el.dataset.id;
-                const d = todosDispositivos.find(x => (x.Folio || x.folio) === id);
-                if (d) abrirModal(d);
-            });
-        });
     }
 
     // ============================================================
@@ -2156,7 +1917,6 @@ body::before {
         renderLista(filtrados);
         actualizarStats(filtrados);
         actualizarGraficos(filtrados);
-        // Guardar filtrados para PDF
         window._filtrados = filtrados;
     }
 
@@ -2396,7 +2156,6 @@ body::before {
                     8: { cellWidth: 26, fontStyle: 'bold' }
                 },
                 didDrawPage: (data) => {
-                    // Footer
                     const pageCount = doc.internal.getNumberOfPages();
                     const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
                     doc.setFontSize(8);
@@ -2425,7 +2184,7 @@ body::before {
     // ============================================================
     $('btnExportar').addEventListener('click', () => {
         if (!todosDispositivos.length) return showToast('No hay datos para exportar', 'info');
-        const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt','FotoURL'];
+        const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt'];
         let csv = headers.join(';') + '\n';
         todosDispositivos.forEach(d => {
             csv += headers.map(h => `"${String(d[h] || '').replace(/"/g, '""')}"`).join(';') + '\n';
@@ -2651,7 +2410,6 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             await navigator.clipboard.writeText(txt);
             showToast('Plantilla copiada al portapapeles', 'success');
         } catch (e) {
-            // Fallback iOS
             const ta = document.createElement('textarea');
             ta.value = txt;
             ta.style.position = 'fixed';
@@ -2732,7 +2490,6 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
         await pedirPermisoNotif();
     });
 
-    // Activar notificaciones automáticamente si ya hay permiso
     if ('Notification' in window && Notification.permission === 'granted') {
         notificacionesActivas = true;
     }
@@ -2776,7 +2533,7 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             return;
         }
         await sincronizar();
-        console.log('📦 Inventario cargado · Azul Tecnológico · v2.0');
+        console.log('📦 Inventario cargado · Azul Tecnológico · v2.1 (sin fotos)');
     })();
 
 })();
