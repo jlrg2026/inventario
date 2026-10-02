@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Inventario de Dispositivos</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Inventario">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* ... (TODO el CSS original se mantiene igual) ... */
+        :root {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #6c757d;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+            --input-bg: #f8f9fa;
+            --input-border: #d1d5db;
+            --header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --badge-bg: #e9ecef;
+            --badge-text: #495057;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2333;
+            --text-primary: #e6edf3;
+            --text-secondary: #b0b8c4;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.6);
+            --input-bg: #0d1117;
+            --input-border: #30363d;
+            --header-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --badge-bg: #21262d;
+            --badge-text: #c9d1d9;
+        }
+
+        /* ... resto del CSS exactamente igual que el original ... */
+        /* (mantén todo el CSS original sin cambios) */
+        
+        /* NUEVO: Indicador de conexión */
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .connection-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        .connection-status.offline .dot {
+            background: #ef4444;
+            animation: none;
+        }
+        .connection-status.syncing .dot {
+            background: #f59e0b;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Botón de sincronización manual */
+        .btn-sync {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .btn-sync:hover {
+            background: rgba(255,255,255,0.35);
+        }
+        .btn-sync.spinning {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- HEADER con indicador de conexión -->
+        <header class="header">
+            <h1>📦 Inventario <span>· Dispositivos</span></h1>
+            <div class="header-actions">
+                <span class="connection-status" id="connectionStatus">
+                    <span class="dot"></span>
+                    <span id="connectionText">Conectado</span>
+                </span>
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">🌙</button>
+                <button class="btn-sync" id="btnSync" title="Sincronizar ahora">🔄</button>
+                <button class="btn btn-success" id="btnExportar">📥 Exportar</button>
+            </div>
+        </header>
+
+        <!-- ... TODO el resto del HTML (stats, charts, formulario, modal, etc.) se mantiene IGUAL ... -->
+        
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ===== SCRIPT PRINCIPAL (sin Firebase) ===== -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // ============================================================
+        // CONFIGURACIÓN - ¡REEMPLAZA CON TU URL DE APPS SCRIPT!
+        // ============================================================
+        const API_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+        
+        // ============================================================
+        // ESTADO GLOBAL
+        // ============================================================
+        let todosDispositivos = [];
+        let isOnline = navigator.onLine;
+        let syncing = false;
+        
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const form = document.getElementById('formDispositivo');
+        const listaEl = document.getElementById('listaDispositivos');
+        const searchInput = document.getElementById('searchInput');
+        const filterTipo = document.getElementById('filterTipo');
+        const filterEstado = document.getElementById('filterEstado');
+        const contadorRegistros = document.getElementById('contadorRegistros');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
+        const btnSync = document.getElementById('btnSync');
+        
+        // ============================================================
+        // API - COMUNICACIÓN CON GOOGLE SHEETS
+        // ============================================================
+        async function apiCall(method, body = null) {
+            if (!API_URL || API_URL.includes('PEGA_AQUI')) {
+                throw new Error('⚠️ Configura la URL de Apps Script en API_URL');
+            }
+            
+            const options = {
+                method: method,
+                redirect: 'follow'
+            };
+            
+            if (body) {
+                options.method = 'POST';
+                options.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+                options.body = JSON.stringify(body);
+            }
+            
+            const response = await fetch(API_URL, options);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            
+            const json = await response.json();
+            if (!json.ok) throw new Error(json.error || 'Error desconocido');
+            
+            return json.data;
+        }
+        
+        async function cargarDispositivos() {
+            setConnectionStatus('syncing');
+            try {
+                const data = await apiCall('GET');
+                todosDispositivos = Array.isArray(data) ? data : [];
+                aplicarFiltros();
+                setConnectionStatus('online');
+                return todosDispositivos;
+            } catch (error) {
+                console.error('Error cargando:', error);
+                setConnectionStatus('offline');
+                showToast('❌ Error al cargar: ' + error.message, 'error');
+                throw error;
+            }
+        }
+        
+        async function crearDispositivo(data) {
+            const result = await apiCall('POST', { action: 'create', data: data });
+            await cargarDispositivos();
+            return result;
+        }
+        
+        async function actualizarDispositivo(id, data) {
+            const result = await apiCall('POST', { action: 'update', id: id, data: data });
+            await cargarDispositivos();
+            return result;
+        }
+        
+        async function eliminarDispositivo(id) {
+            const result = await apiCall('POST', { action: 'delete', id: id });
+            await cargarDispositivos();
+            return result;
+        }
+        
+        async function actualizarRapido(id, data) {
+            const result = await apiCall('POST', { action: 'quickUpdate', id: id, data: data });
+            await cargarDispositivos();
+            return result;
+        }
+        
+        // ============================================================
+        // INDICADOR DE CONEXIÓN
+        // ============================================================
+        function setConnectionStatus(status) {
+            connectionStatus.classList.remove('offline', 'syncing');
+            if (status === 'offline') {
+                connectionStatus.classList.add('offline');
+                connectionText.textContent = 'Sin conexión';
+            } else if (status === 'syncing') {
+                connectionStatus.classList.add('syncing');
+                connectionText.textContent = 'Sincronizando...';
+            } else {
+                connectionText.textContent = 'Conectado';
+            }
+        }
+        
+        // ============================================================
+        // SINCRONIZACIÓN
+        // ============================================================
+        async function sincronizar() {
+            if (syncing) return;
+            syncing = true;
+            btnSync.classList.add('spinning');
+            try {
+                await cargarDispositivos();
+                showToast('✅ Sincronizado', 'success');
+            } catch (e) {
+                // ya se maneja
+            } finally {
+                syncing = false;
+                btnSync.classList.remove('spinning');
+            }
+        }
+        
+        btnSync.addEventListener('click', sincronizar);
+        
+        window.addEventListener('online', () => {
+            isOnline = true;
+            showToast('🌐 Conexión restaurada, sincronizando...', 'info');
+            sincronizar();
+        });
+        
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            setConnectionStatus('offline');
+            showToast('📴 Sin conexión a internet', 'error');
+        });
+        
+        // ============================================================
+        // CONDITIONAL FIELDS
+        // ============================================================
+        const estadoSelect = document.getElementById('estado');
+        const fechaAsignacionGroup = document.getElementById('fechaAsignacionGroup');
+        const fechaBajaGroup = document.getElementById('fechaBajaGroup');
+        
+        function toggleConditionalFields(estado) {
+            fechaAsignacionGroup.classList.toggle('visible', estado === 'Asignado');
+            fechaBajaGroup.classList.toggle('visible', estado === 'Dado de baja');
+        }
+        estadoSelect.addEventListener('change', (e) => toggleConditionalFields(e.target.value));
+        toggleConditionalFields(estadoSelect.value);
+        
+        // ============================================================
+        // MODAL
+        // ============================================================
+        const modal = document.getElementById('modalEditar');
+        const modalCerrar = document.getElementById('modalCerrar');
+        const modalCerrarBtn = document.getElementById('modalCerrarBtn');
+        const formEditar = document.getElementById('formEditar');
+        const modalFolio = document.getElementById('modalFolio');
+        let editandoId = null;
+        
+        const editEstadoSelect = document.getElementById('editEstado');
+        const editFechaAsignacionGroup = document.getElementById('editFechaAsignacionGroup');
+        const editFechaBajaGroup = document.getElementById('editFechaBajaGroup');
+        
+        function toggleEditConditionalFields(estado) {
+            editFechaAsignacionGroup.classList.toggle('visible', estado === 'Asignado');
+            editFechaBajaGroup.classList.toggle('visible', estado === 'Dado de baja');
+        }
+        editEstadoSelect.addEventListener('change', (e) => toggleEditConditionalFields(e.target.value));
+        
+        function abrirModal(dispositivo) {
+            editandoId = dispositivo.id || dispositivo.Folio;
+            modalFolio.textContent = dispositivo.Folio || dispositivo.folio || 'INV-000000';
+            
+            // Mapeo: campos del Sheet → campos del formulario
+            document.getElementById('editTipoDispositivo').value = dispositivo.Tipo || '';
+            document.getElementById('editEstado').value = dispositivo.Estado || '';
+            document.getElementById('editMarca').value = dispositivo.Marca || '';
+            document.getElementById('editModelo').value = dispositivo.Modelo || '';
+            document.getElementById('editNumSerie').value = dispositivo.NumSerie || '';
+            document.getElementById('editColor').value = dispositivo.Color || '';
+            document.getElementById('editCapacidad').value = dispositivo.Capacidad || '';
+            document.getElementById('editSistemaOperativo').value = dispositivo.SistemaOperativo || '';
+            document.getElementById('editDireccionMAC').value = dispositivo.DireccionMAC || '';
+            document.getElementById('editDireccionIP').value = dispositivo.DireccionIP || '';
+            document.getElementById('editUdid').value = dispositivo.UDID || '';
+            document.getElementById('editUsuarioAsignado').value = dispositivo.UsuarioAsignado || '';
+            document.getElementById('editEmailCloud').value = dispositivo.EmailCloud || '';
+            document.getElementById('editArea').value = dispositivo.Area || '';
+            document.getElementById('editUbicacion').value = dispositivo.Ubicacion || '';
+            document.getElementById('editObservaciones').value = dispositivo.Observaciones || '';
+            document.getElementById('editFechaAsignacion').value = dispositivo.FechaAsignacion || '';
+            document.getElementById('editFechaBaja').value = dispositivo.FechaBaja || '';
+            
+            toggleEditConditionalFields(dispositivo.Estado || '');
+            modal.classList.add('active');
+        }
+        
+        function cerrarModal() {
+            modal.classList.remove('active');
+            editandoId = null;
+        }
+        
+        modalCerrar.addEventListener('click', cerrarModal);
+        modalCerrarBtn.addEventListener('click', cerrarModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+        
+        // ============================================================
+        // GUARDAR EDICIÓN
+        // ============================================================
+        formEditar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!editandoId) return showToast('❌ No hay dispositivo seleccionado', 'error');
+            
+            const estado = document.getElementById('editEstado').value;
+            const data = {
+                tipoDispositivo: document.getElementById('editTipoDispositivo').value,
+                estado: estado,
+                marca: document.getElementById('editMarca').value,
+                modelo: document.getElementById('editModelo').value.trim(),
+                numSerie: document.getElementById('editNumSerie').value.trim(),
+                color: document.getElementById('editColor').value,
+                capacidad: document.getElementById('editCapacidad').value.trim(),
+                sistemaOperativo: document.getElementById('editSistemaOperativo').value,
+                direccionMAC: document.getElementById('editDireccionMAC').value.trim(),
+                direccionIP: document.getElementById('editDireccionIP').value.trim(),
+                udid: document.getElementById('editUdid').value.trim(),
+                usuarioAsignado: document.getElementById('editUsuarioAsignado').value.trim(),
+                emailCloud: document.getElementById('editEmailCloud').value.trim(),
+                area: document.getElementById('editArea').value,
+                ubicacion: document.getElementById('editUbicacion').value,
+                observaciones: document.getElementById('editObservaciones').value.trim(),
+                fechaAsignacion: estado === 'Asignado' ? document.getElementById('editFechaAsignacion').value : '',
+                fechaBaja: estado === 'Dado de baja' ? document.getElementById('editFechaBaja').value : ''
+            };
+            
+            if (!data.tipoDispositivo || !data.estado) {
+                return showToast('⚠️ Tipo y Estado son obligatorios', 'error');
+            }
+            
+            try {
+                showToast('💾 Guardando...', 'info');
+                await actualizarDispositivo(editandoId, data);
+                showToast('✅ Actualizado correctamente', 'success');
+                cerrarModal();
+            } catch (error) {
+                showToast('❌ Error: ' + error.message, 'error');
+            }
+        });
+        
+        // ============================================================
+        // FORMATEAR FECHA
+        // ============================================================
+        function fmtFecha(str) {
+            if (!str) return '';
+            try {
+                // Si es formato Google Sheets (yyyy-mm-dd HH:mm:ss o ISO)
+                const d = new Date(str);
+                if (isNaN(d.getTime())) return str;
+                return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            } catch { return str; }
+        }
+        
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // ============================================================
+        // VALIDACIÓN
+        // ============================================================
+        function validateForm() {
+            let valid = true;
+            ['tipoDispositivo', 'estado'].forEach(id => {
+                const el = document.getElementById(id);
+                const group = el.closest('.form-group');
+                if (!el.value) { group.classList.add('error'); valid = false; }
+                else group.classList.remove('error');
+            });
+            return valid;
+        }
+        
+        // ============================================================
+        // REGISTRAR DISPOSITIVO
+        // ============================================================
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!validateForm()) return showToast('⚠️ Los campos con * son obligatorios', 'error');
+            
+            const estado = document.getElementById('estado').value;
+            const data = {
+                tipoDispositivo: document.getElementById('tipoDispositivo').value,
+                estado: estado,
+                marca: document.getElementById('marca').value,
+                modelo: document.getElementById('modelo').value.trim(),
+                numSerie: document.getElementById('numSerie').value.trim(),
+                color: document.getElementById('color').value,
+                capacidad: document.getElementById('capacidad').value.trim(),
+                sistemaOperativo: document.getElementById('sistemaOperativo').value,
+                direccionMAC: document.getElementById('direccionMAC').value.trim(),
+                direccionIP: document.getElementById('direccionIP').value.trim(),
+                udid: document.getElementById('udid').value.trim(),
+                usuarioAsignado: document.getElementById('usuarioAsignado').value.trim(),
+                emailCloud: document.getElementById('emailCloud').value.trim(),
+                area: document.getElementById('area').value,
+                ubicacion: document.getElementById('ubicacion').value,
+                observaciones: document.getElementById('observaciones').value.trim(),
+                fechaAsignacion: estado === 'Asignado' ? document.getElementById('fechaAsignacion').value : '',
+                fechaBaja: estado === 'Dado de baja' ? document.getElementById('fechaBaja').value : ''
+            };
+            
+            try {
+                showToast('💾 Registrando...', 'info');
+                const result = await crearDispositivo(data);
+                form.reset();
+                document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
+                toggleConditionalFields('');
+                showToast(`✅ ${result.Folio || result.folio} registrado`, 'success');
+            } catch (error) {
+                showToast('❌ Error: ' + error.message, 'error');
+            }
+        });
+        
+        // ============================================================
+        // RENDERIZAR LISTA (usa nombres de columna del Sheet)
+        // ============================================================
+        function renderizarLista(filtrados) {
+            if (!filtrados || filtrados.length === 0) {
+                listaEl.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No hay dispositivos</h3><p>Registra tu primer dispositivo usando el formulario.</p></div>`;
+                contadorRegistros.textContent = '(0)';
+                return;
+            }
+            
+            contadorRegistros.textContent = `(${filtrados.length})`;
+            
+            listaEl.innerHTML = filtrados.map(d => {
+                const estado = d.Estado || '';
+                const statusClass = {
+                    'Asignado': 'status-asignado',
+                    'En reparación': 'status-enreparacion',
+                    'Almacenado': 'status-almacenado',
+                    'Dado de baja': 'status-dadobaja',
+                    'Prestado': 'status-prestado'
+                }[estado] || '';
+                
+                const folio = d.Folio || d.folio || '';
+                
+                return `
+                <div class="device-card" data-id="${folio}">
+                    <div class="device-header">
+                        <span class="device-folio">${folio}</span>
+                        <span class="device-status ${statusClass}">${estado}</span>
+                    </div>
+                    <div class="device-details">
+                        <span><strong>Tipo:</strong> ${d.Tipo || 'N/A'}</span>
+                        <span><strong>Marca:</strong> ${d.Marca || 'N/A'}</span>
+                        <span><strong>Modelo:</strong> ${d.Modelo || 'N/A'}</span>
+                        <span><strong>Serie:</strong> ${d.NumSerie || 'N/A'}</span>
+                        <span><strong>Color:</strong> ${d.Color || 'N/A'}</span>
+                        <span><strong>Capacidad:</strong> ${d.Capacidad || 'N/A'}</span>
+                        <span><strong>SO:</strong> ${d.SistemaOperativo || 'N/A'}</span>
+                        <span><strong>MAC:</strong> ${d.DireccionMAC || 'N/A'}</span>
+                        <span><strong>IP:</strong> ${d.DireccionIP || 'N/A'}</span>
+                        <span><strong>UDID:</strong> ${d.UDID || 'N/A'}</span>
+                        <span><strong>Usuario:</strong> ${d.UsuarioAsignado || 'N/A'}</span>
+                        <span><strong>Email/Cloud:</strong> ${d.EmailCloud || 'N/A'}</span>
+                        <span><strong>Área:</strong> ${d.Area || 'N/A'}</span>
+                        <span><strong>Ubicación:</strong> ${d.Ubicacion || 'N/A'}</span>
+                        ${d.FechaAsignacion ? `<span><strong>Fecha Asignación:</strong> ${d.FechaAsignacion}</span>` : ''}
+                        ${d.FechaBaja ? `<span><strong>Fecha Baja:</strong> ${d.FechaBaja}</span>` : ''}
+                        <span><strong>Registro:</strong> ${fmtFecha(d.CreatedAt)}</span>
+                        ${d.Observaciones ? `<span style="grid-column:1/-1"><strong>Obs:</strong> ${d.Observaciones}</span>` : ''}
+                    </div>
+                    <div class="device-actions">
+                        <select class="edit-estado">
+                            ${['Asignado','En reparación','Almacenado','Dado de baja','Prestado'].map(s =>
+                                `<option ${estado===s?'selected':''}>${s}</option>`
+                            ).join('')}
+                        </select>
+                        <input class="edit-usuario" value="${d.UsuarioAsignado || ''}" placeholder="Usuario">
+                        <button class="btn btn-primary btn-sm guardar-cambio" data-id="${folio}">💾 Actualizar</button>
+                        <button class="btn btn-warning btn-sm editar-todo" data-id="${folio}">✏️ Editar</button>
+                        <button class="btn btn-danger btn-sm eliminar" data-id="${folio}">🗑️ Eliminar</button>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            // Actualización rápida
+            document.querySelectorAll('.guardar-cambio').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const card = btn.closest('.device-card');
+                    const id = btn.dataset.id;
+                    const nuevoEstado = card.querySelector('.edit-estado').value;
+                    const nuevoUsuario = card.querySelector('.edit-usuario').value.trim();
+                    try {
+                        showToast('💾 Actualizando...', 'info');
+                        await actualizarRapido(id, { estado: nuevoEstado, usuarioAsignado: nuevoUsuario });
+                        showToast('✅ Actualizado', 'success');
+                    } catch (error) {
+                        showToast('❌ Error: ' + error.message, 'error');
+                    }
+                });
+            });
+            
+            // Editar todo
+            document.querySelectorAll('.editar-todo').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const dispositivo = todosDispositivos.find(d => (d.Folio || d.folio) === id);
+                    if (dispositivo) abrirModal(dispositivo);
+                });
+            });
+            
+            // Eliminar
+            document.querySelectorAll('.eliminar').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id;
+                    if (confirm(`¿Eliminar ${id} permanentemente?`)) {
+                        try {
+                            showToast('🗑️ Eliminando...', 'info');
+                            await eliminarDispositivo(id);
+                            showToast(`🗑️ ${id} eliminado`, 'info');
+                        } catch (error) {
+                            showToast('❌ Error: ' + error.message, 'error');
+                        }
+                    }
+                });
+            });
+        }
+        
+        // ============================================================
+        // FILTRADO
+        // ============================================================
+        function aplicarFiltros() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const tipo = filterTipo.value;
+            const estado = filterEstado.value;
+            
+            const filtrados = todosDispositivos.filter(d => {
+                const search = !searchTerm || [
+                    d.Folio, d.Tipo, d.Marca, d.Modelo, d.UsuarioAsignado,
+                    d.NumSerie, d.UDID, d.Area, d.Ubicacion, d.EmailCloud
+                ].some(v => String(v || '').toLowerCase().includes(searchTerm));
+                const matchTipo = !tipo || d.Tipo === tipo;
+                const matchEstado = !estado || d.Estado === estado;
+                return search && matchTipo && matchEstado;
+            });
+            
+            renderizarLista(filtrados);
+            actualizarEstadisticas(filtrados);
+            actualizarGraficos(filtrados);
+        }
+        
+        // ============================================================
+        // ESTADÍSTICAS
+        // ============================================================
+        function actualizarEstadisticas(dispositivos) {
+            document.getElementById('totalDispositivos').textContent = dispositivos.length;
+            document.getElementById('asignados').textContent = dispositivos.filter(d => d.Estado === 'Asignado').length;
+            document.getElementById('enReparacion').textContent = dispositivos.filter(d => d.Estado === 'En reparación').length;
+            document.getElementById('almacenados').textContent = dispositivos.filter(d => d.Estado === 'Almacenado').length;
+            document.getElementById('prestados').textContent = dispositivos.filter(d => d.Estado === 'Prestado').length;
+            document.getElementById('dadosBaja').textContent = dispositivos.filter(d => d.Estado === 'Dado de baja').length;
+        }
+        
+        // ============================================================
+        // GRÁFICOS
+        // ============================================================
+        let chartTipo = null, chartEstado = null, chartArea = null, chartUbicacion = null;
+        
+        function actualizarGraficos(dispositivos) {
+            const coloresBase = ['#667eea','#764ba2','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+            
+            // Por Tipo
+            const tipos = {};
+            dispositivos.forEach(d => { const t = d.Tipo || 'Desconocido'; tipos[t] = (tipos[t]||0)+1; });
+            const labelsTipo = Object.keys(tipos);
+            const dataTipo = Object.values(tipos);
+            if (chartTipo) chartTipo.destroy();
+            chartTipo = new Chart(document.getElementById('chartTipo').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: labelsTipo.length ? labelsTipo : ['Sin datos'], datasets: [{ data: labelsTipo.length ? dataTipo : [1], backgroundColor: labelsTipo.length ? coloresBase.slice(0, labelsTipo.length) : ['#e5e7eb'], borderWidth: 2, borderColor: 'var(--bg-card)' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 }, color: 'var(--text-secondary)' } } }, cutout: '65%' }
+            });
+            
+            // Por Estado
+            const ordenEstados = ['Asignado','En reparación','Almacenado','Prestado','Dado de baja'];
+            const estados = {}; ordenEstados.forEach(e => estados[e] = 0);
+            dispositivos.forEach(d => { if (estados[d.Estado] !== undefined) estados[d.Estado]++; });
+            if (chartEstado) chartEstado.destroy();
+            chartEstado = new Chart(document.getElementById('chartEstado').getContext('2d'), {
+                type: 'bar',
+                data: { labels: Object.keys(estados), datasets: [{ label: 'Dispositivos', data: Object.values(estados), backgroundColor: ['#3b82f6','#ef4444','#f59e0b','#8b5cf6','#6b7280'], borderRadius: 8, borderSkipped: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' }, grid: { color: 'var(--border-color)' } }, x: { ticks: { color: 'var(--text-muted)', font: { size: 10 } }, grid: { display: false } } } }
+            });
+            
+            // Por Área
+            const areas = {};
+            dispositivos.forEach(d => { const a = d.Area || 'Sin asignar'; areas[a] = (areas[a]||0)+1; });
+            const labelsArea = Object.keys(areas);
+            if (chartArea) chartArea.destroy();
+            chartArea = new Chart(document.getElementById('chartArea').getContext('2d'), {
+                type: 'bar',
+                data: { labels: labelsArea.length ? labelsArea : ['Sin datos'], datasets: [{ label: 'Dispositivos', data: labelsArea.length ? Object.values(areas) : [1], backgroundColor: labelsArea.length ? coloresBase.slice(0, labelsArea.length) : ['#e5e7eb'], borderRadius: 8, borderSkipped: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' }, grid: { color: 'var(--border-color)' } }, x: { ticks: { color: 'var(--text-muted)', font: { size: 9 }, maxRotation: 45, minRotation: 30 }, grid: { display: false } } } }
+            });
+            
+            // Por Ubicación
+            const ubicaciones = {};
+            dispositivos.forEach(d => { const u = d.Ubicacion || 'Sin asignar'; ubicaciones[u] = (ubicaciones[u]||0)+1; });
+            const labelsUb = Object.keys(ubicaciones);
+            if (chartUbicacion) chartUbicacion.destroy();
+            chartUbicacion = new Chart(document.getElementById('chartUbicacion').getContext('2d'), {
+                type: 'bar',
+                data: { labels: labelsUb.length ? labelsUb : ['Sin datos'], datasets: [{ label: 'Dispositivos', data: labelsUb.length ? Object.values(ubicaciones) : [1], backgroundColor: labelsUb.length ? coloresBase.slice(0, labelsUb.length) : ['#e5e7eb'], borderRadius: 8, borderSkipped: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' }, grid: { color: 'var(--border-color)' } }, x: { ticks: { color: 'var(--text-muted)', font: { size: 8 }, maxRotation: 45, minRotation: 30 }, grid: { display: false } } } }
+            });
+        }
+        
+        // ============================================================
+        // EXPORTAR CSV
+        // ============================================================
+        document.getElementById('btnExportar').addEventListener('click', async () => {
+            try {
+                const data = await apiCall('GET');
+                if (!data || data.length === 0) return showToast('No hay datos para exportar', 'info');
+                
+                const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt'];
+                
+                let csv = headers.join(';') + '\n';
+                data.forEach(d => {
+                    csv += headers.map(h => `"${String(d[h]||'').replace(/"/g,'""')}"`).join(';') + '\n';
+                });
+                
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                showToast('📥 CSV exportado', 'success');
+            } catch (error) {
+                showToast('❌ Error al exportar: ' + error.message, 'error');
+            }
+        });
+        
+        // ============================================================
+        // FILTROS
+        // ============================================================
+        document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
+            searchInput.value = ''; filterTipo.value = ''; filterEstado.value = '';
+            aplicarFiltros();
+        });
+        searchInput.addEventListener('input', aplicarFiltros);
+        filterTipo.addEventListener('change', aplicarFiltros);
+        filterEstado.addEventListener('change', aplicarFiltros);
+        
+        // ============================================================
+        // TEMA
+        // ============================================================
+        const themeToggle = document.getElementById('themeToggle');
+        let darkMode = localStorage.getItem('theme') === 'dark' ||
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        
+        function applyTheme(dark) {
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            themeToggle.textContent = dark ? '☀️' : '🌙';
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+        }
+        applyTheme(darkMode);
+        themeToggle.addEventListener('click', () => {
+            darkMode = !darkMode;
+            applyTheme(darkMode);
+            setTimeout(() => { if (todosDispositivos.length) actualizarGraficos(todosDispositivos); }, 100);
+        });
+        
+        // ============================================================
+        // AUTO-REFRESH cada 30 segundos
+        // ============================================================
+        setInterval(() => {
+            if (isOnline && !syncing && document.visibilityState === 'visible') {
+                cargarDispositivos().catch(() => {});
+            }
+        }, 30000);
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isOnline) {
+                cargarDispositivos().catch(() => {});
+            }
+        });
+        
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        (async function init() {
+            setConnectionStatus(isOnline ? 'online' : 'offline');
+            if (!isOnline) {
+                showToast('📴 Sin conexión. Verifica tu internet.', 'error');
+                return;
+            }
+            await sincronizar();
+            console.log('📦 Inventario cargado (Google Sheets)');
+        })();
+        
+    })();
+    </script>
+
+</body>
+</html>
