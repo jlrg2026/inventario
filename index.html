@@ -941,18 +941,42 @@ body::before {
                     <input type="text" id="numSerie" placeholder="Ej: F2LJQK1234" autocomplete="off">
                 </div>
 
+                <!-- NUEVOS CAMPOS AQUÍ -->
+                <div class="form-group">
+                    <label>IMEI</label>
+                    <input type="text" id="imei" placeholder="Ej: 123456789012345" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Número celular</label>
+                    <input type="text" id="numeroCelular" placeholder="Ej: 5512345678" autocomplete="off" inputmode="tel">
+                </div>
+
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select id="proveedor">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="AT&T">AT&T</option>
+                        <option value="Otro">Otro</option>
+                        <option value="Telcel">Telcel</option>
+                        <option value="Virgin Mobile">Virgin Mobile</option>
+                    </select>
+                </div>
+                <!-- FIN NUEVOS CAMPOS -->
+
                 <div class="form-group">
                     <label>Color</label>
                     <select id="color">
                         <option value="">-- Seleccionar --</option>
-                        <option value="Negro">Negro</option>
+                        <option value="Azul">Azul</option>
                         <option value="Blanco">Blanco</option>
                         <option value="Gris espacial">Gris espacial</option>
-                        <option value="Plateado">Plateado</option>
-                        <option value="Azul">Azul</option>
-                        <option value="Verde">Verde</option>
-                        <option value="Rojo">Rojo</option>
+                        <option value="Morado">Morado</option>
+                        <option value="Negro">Negro</option>
                         <option value="Oro">Oro</option>
+                        <option value="Plateado">Plateado</option>
+                        <option value="Rojo">Rojo</option>
+                        <option value="Verde">Verde</option>
                     </select>
                 </div>
 
@@ -1218,18 +1242,42 @@ body::before {
                     <input type="text" id="editNumSerie" autocomplete="off">
                 </div>
 
+                <!-- NUEVOS CAMPOS EN MODAL EDICIÓN -->
+                <div class="form-group">
+                    <label>IMEI</label>
+                    <input type="text" id="editImei" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Número celular</label>
+                    <input type="text" id="editNumeroCelular" autocomplete="off" inputmode="tel">
+                </div>
+
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select id="editProveedor">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="AT&T">AT&T</option>
+                        <option value="Otro">Otro</option>
+                        <option value="Telcel">Telcel</option>
+                        <option value="Virgin Mobile">Virgin Mobile</option>
+                    </select>
+                </div>
+                <!-- FIN NUEVOS CAMPOS -->
+
                 <div class="form-group">
                     <label>Color</label>
                     <select id="editColor">
                         <option value="">-- Seleccionar --</option>
-                        <option value="Negro">Negro</option>
+                        <option value="Azul">Azul</option>
                         <option value="Blanco">Blanco</option>
                         <option value="Gris espacial">Gris espacial</option>
-                        <option value="Plateado">Plateado</option>
-                        <option value="Azul">Azul</option>
-                        <option value="Verde">Verde</option>
-                        <option value="Rojo">Rojo</option>
+                        <option value="Morado">Morado</option>
+                        <option value="Negro">Negro</option>
                         <option value="Oro">Oro</option>
+                        <option value="Plateado">Plateado</option>
+                        <option value="Rojo">Rojo</option>
+                        <option value="Verde">Verde</option>
                     </select>
                 </div>
 
@@ -1576,6 +1624,9 @@ body::before {
             marca: d.Marca || '',
             modelo: d.Modelo || '',
             numSerie: d.NumSerie || '',
+            imei: d.IMEI || '',
+            numeroCelular: d.NumeroCelular || '',
+            proveedor: d.Proveedor || '',
             color: d.Color || '',
             capacidad: d.Capacidad || '',
             sistemaOperativo: d.SistemaOperativo || '',
@@ -1643,6 +1694,9 @@ body::before {
             marca: $('marca').value,
             modelo: $('modelo').value.trim(),
             numSerie: $('numSerie').value.trim(),
+            imei: $('imei').value.trim(),
+            numeroCelular: $('numeroCelular').value.trim(),
+            proveedor: $('proveedor').value,
             color: $('color').value,
             capacidad: $('capacidad').value.trim(),
             sistemaOperativo: $('sistemaOperativo').value,
@@ -1690,6 +1744,9 @@ body::before {
         $('editMarca').value = f.marca;
         $('editModelo').value = f.modelo;
         $('editNumSerie').value = f.numSerie;
+        $('editImei').value = f.imei;
+        $('editNumeroCelular').value = f.numeroCelular;
+        $('editProveedor').value = f.proveedor;
         $('editColor').value = f.color;
         $('editCapacidad').value = f.capacidad;
         $('editSistemaOperativo').value = f.sistemaOperativo;
@@ -1739,6 +1796,9 @@ body::before {
             marca: $('editMarca').value,
             modelo: $('editModelo').value.trim(),
             numSerie: $('editNumSerie').value.trim(),
+            imei: $('editImei').value.trim(),
+            numeroCelular: $('editNumeroCelular').value.trim(),
+            proveedor: $('editProveedor').value,
             color: $('editColor').value,
             capacidad: $('editCapacidad').value.trim(),
             sistemaOperativo: $('editSistemaOperativo').value,
@@ -1809,6 +1869,9 @@ body::before {
                         <span><strong>Marca</strong>${esc(d.Marca) || 'N/A'}</span>
                         <span><strong>Modelo</strong>${esc(d.Modelo) || 'N/A'}</span>
                         <span><strong>Serie</strong>${esc(d.NumSerie) || 'N/A'}</span>
+                        <span><strong>IMEI</strong>${esc(d.IMEI) || 'N/A'}</span>
+                        <span><strong>Núm. Celular</strong>${esc(d.NumeroCelular) || 'N/A'}</span>
+                        <span><strong>Proveedor</strong>${esc(d.Proveedor) || 'N/A'}</span>
                         <span><strong>Color</strong>${esc(d.Color) || 'N/A'}</span>
                         <span><strong>Capacidad</strong>${esc(d.Capacidad) || 'N/A'}</span>
                         <span><strong>SO</strong>${esc(d.SistemaOperativo) || 'N/A'}</span>
@@ -1907,7 +1970,8 @@ body::before {
         const filtrados = todosDispositivos.filter(d => {
             const matchSearch = !term || [
                 d.Folio, d.Tipo, d.Marca, d.Modelo, d.UsuarioAsignado,
-                d.NumSerie, d.UDID, d.Area, d.Ubicacion, d.EmailCloud
+                d.NumSerie, d.UDID, d.Area, d.Ubicacion, d.EmailCloud,
+                d.IMEI, d.NumeroCelular, d.Proveedor
             ].some(v => String(v || '').toLowerCase().includes(term));
             const matchTipo = !tipo || d.Tipo === tipo;
             const matchEstado = !estado || d.Estado === estado;
@@ -2184,7 +2248,7 @@ body::before {
     // ============================================================
     $('btnExportar').addEventListener('click', () => {
         if (!todosDispositivos.length) return showToast('No hay datos para exportar', 'info');
-        const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt'];
+        const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','IMEI','NumeroCelular','Proveedor','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt'];
         let csv = headers.join(';') + '\n';
         todosDispositivos.forEach(d => {
             csv += headers.map(h => `"${String(d[h] || '').replace(/"/g, '""')}"`).join(';') + '\n';
@@ -2217,6 +2281,9 @@ TIPO DE DISPOSITIVO:  ${d.Tipo || '___________'}
 MARCA:                ${d.Marca || '___________'}
 MODELO:               ${d.Modelo || '___________'}
 NÚMERO DE SERIE:      ${d.NumSerie || '___________'}
+IMEI:                 ${d.IMEI || '___________'}
+NÚMERO CELULAR:       ${d.NumeroCelular || '___________'}
+PROVEEDOR:            ${d.Proveedor || '___________'}
 COLOR:                ${d.Color || '___________'}
 CAPACIDAD:            ${d.Capacidad || '___________'}
 SISTEMA OPERATIVO:    ${d.SistemaOperativo || '___________'}
@@ -2286,6 +2353,9 @@ TIPO DE DISPOSITIVO:  ${d.Tipo || '___________'}
 MARCA:                ${d.Marca || '___________'}
 MODELO:               ${d.Modelo || '___________'}
 NÚMERO DE SERIE:      ${d.NumSerie || '___________'}
+IMEI:                 ${d.IMEI || '___________'}
+NÚMERO CELULAR:       ${d.NumeroCelular || '___________'}
+PROVEEDOR:            ${d.Proveedor || '___________'}
 COLOR:                ${d.Color || '___________'}
 CAPACIDAD:            ${d.Capacidad || '___________'}
 SISTEMA OPERATIVO:    ${d.SistemaOperativo || '___________'}
