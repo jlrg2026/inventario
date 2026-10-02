@@ -1,757 +1,2153 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Inventario de Dispositivos</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Inventario">
+<meta name="theme-color" content="#667eea">
+<title>Inventario · Dispositivos</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Inventario">
-    <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <style>
-        /* ... (TODO el CSS original se mantiene igual) ... */
-        :root {
-            --bg-primary: #f0f2f5;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #1a1a2e;
-            --text-secondary: #4a4a6a;
-            --text-muted: #6c757d;
-            --border-color: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.12);
-            --radius: 16px;
-            --transition: all 0.3s ease;
-            --input-bg: #f8f9fa;
-            --input-border: #d1d5db;
-            --header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --badge-bg: #e9ecef;
-            --badge-text: #495057;
-        }
+<style>
+/* ============================================================
+   VARIABLES DE TEMA
+   ============================================================ */
+:root {
+    --bg-primary: #eef1f8;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-input: #f4f6fb;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.04);
+    --shadow-md: 0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
+    --shadow-lg: 0 20px 40px -12px rgba(15,23,42,.18);
+    --shadow-glow: 0 0 0 4px rgba(102,126,234,.15);
+    --radius-sm: 10px;
+    --radius: 16px;
+    --radius-lg: 22px;
+    --radius-xl: 28px;
+    --transition: cubic-bezier(.4,0,.2,1) .25s;
+    --grad-header: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    --grad-primary: linear-gradient(135deg, #667eea, #764ba2);
+    --grad-success: linear-gradient(135deg, #10b981, #059669);
+    --grad-warning: linear-gradient(135deg, #f59e0b, #d97706);
+    --grad-danger: linear-gradient(135deg, #ef4444, #dc2626);
+    --grad-info: linear-gradient(135deg, #3b82f6, #2563eb);
+    --grad-purple: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
 
-        [data-theme="dark"] {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-card: #1c2333;
-            --text-primary: #e6edf3;
-            --text-secondary: #b0b8c4;
-            --text-muted: #8b949e;
-            --border-color: #30363d;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            --shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.6);
-            --input-bg: #0d1117;
-            --input-border: #30363d;
-            --header-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            --badge-bg: #21262d;
-            --badge-text: #c9d1d9;
-        }
+[data-theme="dark"] {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #161e2e;
+    --bg-elevated: #1c2537;
+    --bg-input: #0f1624;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #1f2937;
+    --border-strong: #334155;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+    --shadow-lg: 0 20px 40px -12px rgba(0,0,0,.6);
+    --shadow-glow: 0 0 0 4px rgba(102,126,234,.25);
+    --grad-header: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+}
 
-        /* ... resto del CSS exactamente igual que el original ... */
-        /* (mantén todo el CSS original sin cambios) */
-        
-        /* NUEVO: Indicador de conexión */
-        .connection-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.15);
-            color: white;
-        }
-        .connection-status .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-        .connection-status.offline .dot {
-            background: #ef4444;
-            animation: none;
-        }
-        .connection-status.syncing .dot {
-            background: #f59e0b;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        /* Botón de sincronización manual */
-        .btn-sync {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .btn-sync:hover {
-            background: rgba(255,255,255,0.35);
-        }
-        .btn-sync.spinning {
-            animation: spin 1s linear infinite;
-        }
-    </style>
+/* ============================================================
+   RESET Y BASE
+   ============================================================ */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-primary);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    transition: background-color .3s ease, color .3s ease;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+}
+
+/* Fondo decorativo */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(102,126,234,.10), transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(240,147,251,.10), transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(118,75,162,.08), transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #5568d3, #653c8f); background-clip: padding-box; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+/* ============================================================
+   HEADER PREMIUM
+   ============================================================ */
+.header {
+    background: var(--grad-header);
+    color: white;
+    padding: 22px 26px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: 0 12px 32px -8px rgba(102,126,234,.45), inset 0 1px 0 rgba(255,255,255,.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,.15), transparent 70%);
+    pointer-events: none;
+}
+
+.header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.header h1 span {
+    font-weight: 400;
+    opacity: .85;
+    font-size: 18px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+/* Indicador conexión */
+.connection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.2);
+    transition: var(--transition);
+}
+
+.connection-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulse 2s infinite;
+}
+
+.connection-badge.offline .dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; animation: none; }
+.connection-badge.syncing .dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: pulse .8s infinite; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .6; transform: scale(1.15); }
+}
+
+/* Botón tema */
+.icon-btn {
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.2);
+    color: white;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.icon-btn:hover { background: rgba(255,255,255,.3); transform: translateY(-2px); }
+.icon-btn:active { transform: scale(.95); }
+.icon-btn.spinning { animation: spin 1s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btn {
+    padding: 11px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    letter-spacing: .2px;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn:active { transform: scale(.97); }
+
+.btn-primary {
+    background: var(--grad-primary);
+    color: white;
+    box-shadow: 0 6px 16px -4px rgba(102,126,234,.5);
+}
+.btn-primary:hover { box-shadow: 0 10px 24px -4px rgba(102,126,234,.65); transform: translateY(-2px); }
+
+.btn-success {
+    background: var(--grad-success);
+    color: white;
+    box-shadow: 0 6px 16px -4px rgba(16,185,129,.5);
+}
+.btn-success:hover { box-shadow: 0 10px 24px -4px rgba(16,185,129,.65); transform: translateY(-2px); }
+
+.btn-danger {
+    background: var(--grad-danger);
+    color: white;
+    box-shadow: 0 6px 16px -4px rgba(239,68,68,.4);
+}
+.btn-danger:hover { box-shadow: 0 10px 24px -4px rgba(239,68,68,.6); transform: translateY(-2px); }
+
+.btn-warning {
+    background: var(--grad-warning);
+    color: white;
+    box-shadow: 0 6px 16px -4px rgba(245,158,11,.4);
+}
+.btn-warning:hover { box-shadow: 0 10px 24px -4px rgba(245,158,11,.6); transform: translateY(-2px); }
+
+.btn-info {
+    background: var(--grad-info);
+    color: white;
+    box-shadow: 0 6px 16px -4px rgba(59,130,246,.4);
+}
+.btn-info:hover { transform: translateY(-2px); }
+
+.btn-outline {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+.btn-outline:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: rgba(102,126,234,.06);
+}
+
+.btn-ghost {
+    background: rgba(255,255,255,.18);
+    color: white;
+    border: 1px solid rgba(255,255,255,.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.btn-ghost:hover { background: rgba(255,255,255,.3); transform: translateY(-2px); }
+
+.btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 10px; }
+.btn-block { width: 100%; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.card:hover { box-shadow: var(--shadow-lg); }
+
+.card-title {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -.2px;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.card-title .badge {
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ============================================================
+   ESTADÍSTICAS
+   ============================================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 520px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-item {
+    background: var(--bg-card);
+    padding: 18px 14px;
+    border-radius: var(--radius);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--grad-primary);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.stat-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.stat-item:hover::before { opacity: 1; }
+
+.stat-item.total::before { background: var(--grad-primary); }
+.stat-item.asignado::before { background: var(--grad-info); }
+.stat-item.reparacion::before { background: var(--grad-danger); }
+.stat-item.almacenado::before { background: var(--grad-warning); }
+.stat-item.prestado::before { background: var(--grad-purple); }
+.stat-item.baja::before { background: linear-gradient(135deg, #6b7280, #4b5563); }
+
+.stat-number {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-item.asignado .stat-number { background: var(--grad-info); -webkit-background-clip: text; background-clip: text; }
+.stat-item.reparacion .stat-number { background: var(--grad-danger); -webkit-background-clip: text; background-clip: text; }
+.stat-item.almacenado .stat-number { background: var(--grad-warning); -webkit-background-clip: text; background-clip: text; }
+.stat-item.prestado .stat-number { background: var(--grad-purple); -webkit-background-clip: text; background-clip: text; }
+.stat-item.baja .stat-number { background: linear-gradient(135deg, #6b7280, #4b5563); -webkit-background-clip: text; background-clip: text; }
+
+.stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ============================================================
+   GRÁFICOS
+   ============================================================ */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+@media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+
+.chart-card { padding: 18px; }
+.chart-container { position: relative; height: 240px; }
+
+/* ============================================================
+   FORMULARIO
+   ============================================================ */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full-width { grid-column: 1 / -1; }
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.form-group label .required { color: #ef4444; font-size: 14px; }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 15px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: var(--transition);
+    font-family: inherit;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    font-weight: 500;
+    /* Prevenir zoom en iOS */
+    font-size: 16px;
+}
+
+@media (min-width: 768px) {
+    .form-group input, .form-group select, .form-group textarea { font-size: 14px; }
+}
+
+.form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #667eea;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-glow);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--text-muted); }
+
+.form-group textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+
+.form-group.error input,
+.form-group.error select { border-color: #ef4444; background: rgba(239,68,68,.05); }
+
+.form-group .error-msg {
+    font-size: 11px;
+    color: #ef4444;
+    display: none;
+    font-weight: 600;
+}
+.form-group.error .error-msg { display: block; }
+
+.conditional-field { display: none; }
+.conditional-field.visible { display: flex; animation: slideDown .3s ease; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+/* ============================================================
+   FILTROS
+   ============================================================ */
+.filters-bar {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+@media (max-width: 780px) { .filters-bar { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .filters-bar { grid-template-columns: 1fr; } }
+
+.filters-bar input,
+.filters-bar select {
+    padding: 11px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-family: inherit;
+    transition: var(--transition);
+    outline: none;
+    font-weight: 500;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .filters-bar input, .filters-bar select { font-size: 14px; }
+}
+
+.filters-bar select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+}
+
+.filters-bar input:focus,
+.filters-bar select:focus {
+    border-color: #667eea;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-glow);
+}
+
+/* ============================================================
+   LISTA DE DISPOSITIVOS
+   ============================================================ */
+.device-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 520px) { .device-list { grid-template-columns: 1fr; } }
+
+.device-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp .4s ease backwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.device-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--grad-primary);
+    opacity: .8;
+}
+
+.device-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+}
+
+.device-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.device-folio {
+    font-weight: 900;
+    font-size: 17px;
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -.4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.device-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    white-space: nowrap;
+}
+
+.status-asignado { background: rgba(59,130,246,.15); color: #1e40af; border: 1px solid rgba(59,130,246,.25); }
+.status-enreparacion { background: rgba(239,68,68,.15); color: #b91c1c; border: 1px solid rgba(239,68,68,.25); }
+.status-almacenado { background: rgba(245,158,11,.15); color: #b45309; border: 1px solid rgba(245,158,11,.25); }
+.status-dadobaja { background: rgba(107,114,128,.15); color: #374151; border: 1px solid rgba(107,114,128,.25); }
+.status-prestado { background: rgba(139,92,246,.15); color: #6d28d9; border: 1px solid rgba(139,92,246,.25); }
+
+[data-theme="dark"] .status-asignado { background: rgba(59,130,246,.2); color: #93c5fd; }
+[data-theme="dark"] .status-enreparacion { background: rgba(239,68,68,.2); color: #fca5a5; }
+[data-theme="dark"] .status-almacenado { background: rgba(245,158,11,.2); color: #fcd34d; }
+[data-theme="dark"] .status-dadobaja { background: rgba(107,114,128,.25); color: #d1d5db; }
+[data-theme="dark"] .status-prestado { background: rgba(139,92,246,.25); color: #c4b5fd; }
+
+.device-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+@media (max-width: 420px) { .device-details { grid-template-columns: 1fr; } }
+
+.device-details > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.device-details strong {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    display: block;
+    margin-bottom: 1px;
+}
+
+.device-details .full-span { grid-column: 1 / -1; white-space: normal; }
+
+.device-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.device-actions select,
+.device-actions input {
+    padding: 8px 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    flex: 1 1 120px;
+    transition: var(--transition);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.device-actions select:focus,
+.device-actions input:focus {
+    border-color: #667eea;
+    background: var(--bg-card);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.modal-overlay.active { display: flex; animation: fadeIn .25s ease; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 26px;
+    max-width: 760px;
+    width: 100%;
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    margin: auto;
+    animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border-color);
+    gap: 12px;
+}
+
+.modal-header h3 {
+    font-size: 17px;
+    color: var(--text-primary);
+    font-weight: 800;
+    letter-spacing: -.3px;
+}
+
+.modal-header h3 span {
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-close {
+    background: var(--bg-input);
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition);
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-close:hover { color: var(--text-primary); background: var(--border-color); transform: rotate(90deg); }
+
+/* ============================================================
+   EMPTY / LOADING
+   ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    grid-column: 1 / -1;
+}
+
+.empty-state .icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    opacity: .6;
+}
+
+.empty-state h3 {
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.empty-state p { font-size: 14px; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+    position: fixed;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    right: max(20px, env(safe-area-inset-right));
+    left: max(20px, env(safe-area-inset-right));
+    padding: 14px 20px;
+    border-radius: 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 20px 40px -12px rgba(0,0,0,.4);
+    transform: translateY(150%);
+    opacity: 0;
+    transition: all .4s cubic-bezier(.34,1.56,.64,1);
+    z-index: 9999;
+    text-align: center;
+    pointer-events: none;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+
+.toast-success { background: var(--grad-success); }
+.toast-error { background: var(--grad-danger); }
+.toast-info { background: var(--grad-info); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+    .header { padding: 16px 18px; border-radius: var(--radius); }
+    .header h1 { font-size: 18px; }
+    .header h1 span { font-size: 14px; }
+    .card { padding: 16px; border-radius: var(--radius-sm); }
+    .stat-item { padding: 14px 10px; }
+    .stat-number { font-size: 24px; }
+    .icon-btn { width: 38px; height: 38px; font-size: 16px; }
+    .btn { padding: 10px 16px; font-size: 13px; }
+    .modal { padding: 20px 16px; }
+}
+
+/* Safe area para iOS notch */
+@supports (padding: max(0px)) {
+    .header { padding-left: max(26px, env(safe-area-inset-left)); padding-right: max(26px, env(safe-area-inset-right)); }
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <!-- HEADER con indicador de conexión -->
-        <header class="header">
-            <h1>📦 Inventario <span>· Dispositivos</span></h1>
-            <div class="header-actions">
-                <span class="connection-status" id="connectionStatus">
-                    <span class="dot"></span>
-                    <span id="connectionText">Conectado</span>
-                </span>
-                <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">🌙</button>
-                <button class="btn-sync" id="btnSync" title="Sincronizar ahora">🔄</button>
-                <button class="btn btn-success" id="btnExportar">📥 Exportar</button>
-            </div>
-        </header>
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <h1>📦 Inventario <span>· Dispositivos</span></h1>
+        <div class="header-actions">
+            <span class="connection-badge" id="connectionBadge">
+                <span class="dot"></span>
+                <span id="connectionText">Conectado</span>
+            </span>
+            <button class="icon-btn" id="themeToggle" aria-label="Tema">🌙</button>
+            <button class="icon-btn" id="btnSync" aria-label="Sincronizar" title="Sincronizar">🔄</button>
+            <button class="btn btn-ghost btn-sm" id="btnExportar">📥 Exportar</button>
+        </div>
+    </header>
 
-        <!-- ... TODO el resto del HTML (stats, charts, formulario, modal, etc.) se mantiene IGUAL ... -->
-        
+    <!-- ===== ESTADÍSTICAS ===== -->
+    <div class="stats-grid">
+        <div class="stat-item total">
+            <div class="stat-number" id="statTotal">0</div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-item asignado">
+            <div class="stat-number" id="statAsignados">0</div>
+            <div class="stat-label">Asignados</div>
+        </div>
+        <div class="stat-item reparacion">
+            <div class="stat-number" id="statReparacion">0</div>
+            <div class="stat-label">En reparación</div>
+        </div>
+        <div class="stat-item almacenado">
+            <div class="stat-number" id="statAlmacenados">0</div>
+            <div class="stat-label">Almacenados</div>
+        </div>
+        <div class="stat-item prestado">
+            <div class="stat-number" id="statPrestados">0</div>
+            <div class="stat-label">Prestados</div>
+        </div>
+        <div class="stat-item baja">
+            <div class="stat-number" id="statBaja">0</div>
+            <div class="stat-label">Dados de baja</div>
+        </div>
     </div>
 
-    <!-- TOAST -->
-    <div id="toast" class="toast"></div>
+    <!-- ===== GRÁFICOS ===== -->
+    <div class="charts-grid">
+        <div class="card chart-card">
+            <div class="card-title">📊 Por Tipo</div>
+            <div class="chart-container"><canvas id="chartTipo"></canvas></div>
+        </div>
+        <div class="card chart-card">
+            <div class="card-title">📊 Por Estado</div>
+            <div class="chart-container"><canvas id="chartEstado"></canvas></div>
+        </div>
+        <div class="card chart-card">
+            <div class="card-title">📊 Por Área</div>
+            <div class="chart-container"><canvas id="chartArea"></canvas></div>
+        </div>
+        <div class="card chart-card">
+            <div class="card-title">📊 Por Ubicación</div>
+            <div class="chart-container"><canvas id="chartUbicacion"></canvas></div>
+        </div>
+    </div>
 
-    <!-- ===== SCRIPT PRINCIPAL (sin Firebase) ===== -->
-    <script>
-    (function() {
-        'use strict';
-        
-        // ============================================================
-        // CONFIGURACIÓN - ¡REEMPLAZA CON TU URL DE APPS SCRIPT!
-        // ============================================================
-        const API_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
-        
-        // ============================================================
-        // ESTADO GLOBAL
-        // ============================================================
-        let todosDispositivos = [];
-        let isOnline = navigator.onLine;
-        let syncing = false;
-        
-        // ============================================================
-        // REFERENCIAS DOM
-        // ============================================================
-        const form = document.getElementById('formDispositivo');
-        const listaEl = document.getElementById('listaDispositivos');
-        const searchInput = document.getElementById('searchInput');
-        const filterTipo = document.getElementById('filterTipo');
-        const filterEstado = document.getElementById('filterEstado');
-        const contadorRegistros = document.getElementById('contadorRegistros');
-        const connectionStatus = document.getElementById('connectionStatus');
-        const connectionText = document.getElementById('connectionText');
-        const btnSync = document.getElementById('btnSync');
-        
-        // ============================================================
-        // API - COMUNICACIÓN CON GOOGLE SHEETS
-        // ============================================================
-        async function apiCall(method, body = null) {
-            if (!API_URL || API_URL.includes('PEGA_AQUI')) {
-                throw new Error('⚠️ Configura la URL de Apps Script en API_URL');
-            }
-            
-            const options = {
-                method: method,
-                redirect: 'follow'
-            };
-            
-            if (body) {
-                options.method = 'POST';
-                options.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
-                options.body = JSON.stringify(body);
-            }
-            
-            const response = await fetch(API_URL, options);
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            
-            const json = await response.json();
-            if (!json.ok) throw new Error(json.error || 'Error desconocido');
-            
-            return json.data;
+    <!-- ===== FORMULARIO ===== -->
+    <div class="card">
+        <div class="card-title">➕ Nuevo Dispositivo</div>
+        <form id="formDispositivo" novalidate autocomplete="off">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Tipo de Dispositivo <span class="required">*</span></label>
+                    <select id="tipoDispositivo" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="iPad">iPad</option>
+                        <option value="iPhone">iPhone</option>
+                        <option value="Android">Android</option>
+                        <option value="All in One">All in One</option>
+                        <option value="Servidor">Servidor</option>
+                        <option value="Laptop">Laptop</option>
+                        <option value="Mac">Mac</option>
+                        <option value="Router Telmex">Router Telmex</option>
+                        <option value="Router Total Play">Router Total Play</option>
+                        <option value="Pulsera POPL">Pulsera POPL</option>
+                    </select>
+                    <span class="error-msg">Campo obligatorio</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado <span class="required">*</span></label>
+                    <select id="estado" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Asignado">Asignado</option>
+                        <option value="En reparación">En reparación</option>
+                        <option value="Almacenado">Almacenado</option>
+                        <option value="Dado de baja">Dado de baja</option>
+                        <option value="Prestado">Prestado</option>
+                    </select>
+                    <span class="error-msg">Campo obligatorio</span>
+                </div>
+
+                <div class="form-group conditional-field" id="fechaAsignacionGroup">
+                    <label>Fecha de Asignación</label>
+                    <input type="date" id="fechaAsignacion">
+                </div>
+
+                <div class="form-group conditional-field" id="fechaBajaGroup">
+                    <label>Fecha de Baja</label>
+                    <input type="date" id="fechaBaja">
+                </div>
+
+                <div class="form-group">
+                    <label>Marca</label>
+                    <select id="marca">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Acer">Acer</option>
+                        <option value="Asus">Asus</option>
+                        <option value="Dell">Dell</option>
+                        <option value="Honor">Honor</option>
+                        <option value="HP">HP</option>
+                        <option value="Lenovo">Lenovo</option>
+                        <option value="Mac">Mac</option>
+                        <option value="Motorola">Motorola</option>
+                        <option value="Oppo">Oppo</option>
+                        <option value="Otra">Otra</option>
+                        <option value="POPL">POPL</option>
+                        <option value="Samsung">Samsung</option>
+                        <option value="Vivo">Vivo</option>
+                        <option value="Xiaomi">Xiaomi</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Modelo</label>
+                    <input type="text" id="modelo" placeholder="Ej: iPad Air 5, Galaxy S23..." autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Número de Serie</label>
+                    <input type="text" id="numSerie" placeholder="Ej: F2LJQK1234" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Color</label>
+                    <select id="color">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Negro">Negro</option>
+                        <option value="Blanco">Blanco</option>
+                        <option value="Gris espacial">Gris espacial</option>
+                        <option value="Plateado">Plateado</option>
+                        <option value="Azul">Azul</option>
+                        <option value="Verde">Verde</option>
+                        <option value="Rojo">Rojo</option>
+                        <option value="Oro">Oro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Capacidad / Almacenamiento</label>
+                    <input type="text" id="capacidad" placeholder="Ej: 128GB, 512GB SSD..." autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Sistema Operativo</label>
+                    <select id="sistemaOperativo">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Android">Android</option>
+                        <option value="iOS">iOS</option>
+                        <option value="Linux">Linux</option>
+                        <option value="macOS Sonoma">macOS Sonoma</option>
+                        <option value="Otro">Otro</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11 Home">Windows 11 Home</option>
+                        <option value="Windows 11 Pro">Windows 11 Pro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Dirección MAC</label>
+                    <input type="text" id="direccionMAC" placeholder="Ej: 00:1A:2B:3C:4D:5E" autocomplete="off" autocapitalize="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Dirección IP</label>
+                    <input type="text" id="direccionIP" placeholder="Ej: 192.168.1.10" autocomplete="off" inputmode="decimal">
+                </div>
+
+                <div class="form-group">
+                    <label>UDID</label>
+                    <input type="text" id="udid" placeholder="Ej: 00008020-001E2D8A3A..." autocomplete="off" autocapitalize="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Usuario Asignado</label>
+                    <input type="text" id="usuarioAsignado" placeholder="Nombre del responsable" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>EMAIL / ID Cloud</label>
+                    <input type="text" id="emailCloud" placeholder="Ej: usuario@empresa.com" autocomplete="off" inputmode="email" autocapitalize="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Área</label>
+                    <select id="area">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Asistente Dirección">Asistente Dirección</option>
+                        <option value="Dirección de Marketing">Dirección de Marketing</option>
+                        <option value="Dirección Finanzas">Dirección Finanzas</option>
+                        <option value="Dirección General">Dirección General</option>
+                        <option value="Dirección Operaciones">Dirección Operaciones</option>
+                        <option value="Diseño Digital">Diseño Digital</option>
+                        <option value="Eventos y Congresos">Eventos y Congresos</option>
+                        <option value="IT">IT</option>
+                        <option value="Mercadotecnia">Mercadotecnia</option>
+                        <option value="RH">RH</option>
+                        <option value="Ventas">Ventas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Ubicación</label>
+                    <select id="ubicacion">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Aguascalientes">Aguascalientes</option>
+                        <option value="Baja California">Baja California</option>
+                        <option value="Baja California Sur">Baja California Sur</option>
+                        <option value="Campeche">Campeche</option>
+                        <option value="CDMX">CDMX</option>
+                        <option value="Chiapas">Chiapas</option>
+                        <option value="Chihuahua">Chihuahua</option>
+                        <option value="Coahuila">Coahuila</option>
+                        <option value="Colima">Colima</option>
+                        <option value="Durango">Durango</option>
+                        <option value="Guanajuato">Guanajuato</option>
+                        <option value="Guerrero">Guerrero</option>
+                        <option value="Hidalgo">Hidalgo</option>
+                        <option value="Jalisco">Jalisco</option>
+                        <option value="Estado de México">Estado de México</option>
+                        <option value="Michoacán de Ocampo">Michoacán de Ocampo</option>
+                        <option value="Morelos">Morelos</option>
+                        <option value="Nayarit">Nayarit</option>
+                        <option value="Nuevo León">Nuevo León</option>
+                        <option value="Oaxaca">Oaxaca</option>
+                        <option value="Puebla">Puebla</option>
+                        <option value="Querétaro">Querétaro</option>
+                        <option value="Quintana Roo">Quintana Roo</option>
+                        <option value="San Luis Potosí">San Luis Potosí</option>
+                        <option value="Sinaloa">Sinaloa</option>
+                        <option value="Sonora">Sonora</option>
+                        <option value="Tabasco">Tabasco</option>
+                        <option value="Tamaulipas">Tamaulipas</option>
+                        <option value="Tlaxcala">Tlaxcala</option>
+                        <option value="Veracruz">Veracruz</option>
+                        <option value="Yucatán">Yucatán</option>
+                        <option value="Zacatecas">Zacatecas</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Observaciones</label>
+                    <textarea id="observaciones" rows="3" placeholder="Notas adicionales..."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Registrar Dispositivo</button>
+                        <button type="reset" class="btn btn-outline">🗑️ Limpiar</button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== FILTROS ===== -->
+    <div class="card">
+        <div class="card-title">🔍 Filtros y búsqueda</div>
+        <div class="filters-bar">
+            <input type="text" id="searchInput" placeholder="🔎 Buscar folio, usuario, modelo, serie..." autocomplete="off">
+            <select id="filterTipo">
+                <option value="">Todos los tipos</option>
+                <option value="iPad">iPad</option>
+                <option value="iPhone">iPhone</option>
+                <option value="Android">Android</option>
+                <option value="All in One">All in One</option>
+                <option value="Servidor">Servidor</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Mac">Mac</option>
+                <option value="Router Telmex">Router Telmex</option>
+                <option value="Router Total Play">Router Total Play</option>
+                <option value="Pulsera POPL">Pulsera POPL</option>
+            </select>
+            <select id="filterEstado">
+                <option value="">Todos los estados</option>
+                <option value="Asignado">Asignado</option>
+                <option value="En reparación">En reparación</option>
+                <option value="Almacenado">Almacenado</option>
+                <option value="Dado de baja">Dado de baja</option>
+                <option value="Prestado">Prestado</option>
+            </select>
+            <button class="btn btn-outline btn-sm" id="btnLimpiarFiltros">✖ Limpiar</button>
+        </div>
+    </div>
+
+    <!-- ===== LISTA ===== -->
+    <div class="card">
+        <div class="card-title">
+            📋 Dispositivos Registrados
+            <span class="badge" id="contadorRegistros">0</span>
+        </div>
+        <div id="listaDispositivos" class="device-list">
+            <div class="empty-state">
+                <div class="icon">⏳</div>
+                <h3>Cargando dispositivos...</h3>
+                <p>Conectando con Google Sheets</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== MODAL EDICIÓN ===== -->
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>✏️ Editar: <span id="modalFolio">INV-000000</span></h3>
+            <button class="modal-close" id="modalCerrar" aria-label="Cerrar">&times;</button>
+        </div>
+        <form id="formEditar" novalidate autocomplete="off">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Tipo <span class="required">*</span></label>
+                    <select id="editTipoDispositivo" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="iPad">iPad</option>
+                        <option value="iPhone">iPhone</option>
+                        <option value="Android">Android</option>
+                        <option value="All in One">All in One</option>
+                        <option value="Servidor">Servidor</option>
+                        <option value="Laptop">Laptop</option>
+                        <option value="Mac">Mac</option>
+                        <option value="Router Telmex">Router Telmex</option>
+                        <option value="Router Total Play">Router Total Play</option>
+                        <option value="Pulsera POPL">Pulsera POPL</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado <span class="required">*</span></label>
+                    <select id="editEstado" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Asignado">Asignado</option>
+                        <option value="En reparación">En reparación</option>
+                        <option value="Almacenado">Almacenado</option>
+                        <option value="Dado de baja">Dado de baja</option>
+                        <option value="Prestado">Prestado</option>
+                    </select>
+                </div>
+
+                <div class="form-group conditional-field" id="editFechaAsignacionGroup">
+                    <label>Fecha de Asignación</label>
+                    <input type="date" id="editFechaAsignacion">
+                </div>
+
+                <div class="form-group conditional-field" id="editFechaBajaGroup">
+                    <label>Fecha de Baja</label>
+                    <input type="date" id="editFechaBaja">
+                </div>
+
+                <div class="form-group">
+                    <label>Marca</label>
+                    <select id="editMarca">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Acer">Acer</option>
+                        <option value="Asus">Asus</option>
+                        <option value="Dell">Dell</option>
+                        <option value="Honor">Honor</option>
+                        <option value="HP">HP</option>
+                        <option value="Lenovo">Lenovo</option>
+                        <option value="Mac">Mac</option>
+                        <option value="Motorola">Motorola</option>
+                        <option value="Oppo">Oppo</option>
+                        <option value="Otra">Otra</option>
+                        <option value="POPL">POPL</option>
+                        <option value="Samsung">Samsung</option>
+                        <option value="Vivo">Vivo</option>
+                        <option value="Xiaomi">Xiaomi</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Modelo</label>
+                    <input type="text" id="editModelo" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Número de Serie</label>
+                    <input type="text" id="editNumSerie" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Color</label>
+                    <select id="editColor">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Negro">Negro</option>
+                        <option value="Blanco">Blanco</option>
+                        <option value="Gris espacial">Gris espacial</option>
+                        <option value="Plateado">Plateado</option>
+                        <option value="Azul">Azul</option>
+                        <option value="Verde">Verde</option>
+                        <option value="Rojo">Rojo</option>
+                        <option value="Oro">Oro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Capacidad</label>
+                    <input type="text" id="editCapacidad" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Sistema Operativo</label>
+                    <select id="editSistemaOperativo">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Android">Android</option>
+                        <option value="iOS">iOS</option>
+                        <option value="Linux">Linux</option>
+                        <option value="macOS Sonoma">macOS Sonoma</option>
+                        <option value="Otro">Otro</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11 Home">Windows 11 Home</option>
+                        <option value="Windows 11 Pro">Windows 11 Pro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Dirección MAC</label>
+                    <input type="text" id="editDireccionMAC" autocomplete="off" autocapitalize="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Dirección IP</label>
+                    <input type="text" id="editDireccionIP" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>UDID</label>
+                    <input type="text" id="editUdid" autocomplete="off" autocapitalize="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Usuario Asignado</label>
+                    <input type="text" id="editUsuarioAsignado" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>EMAIL / ID Cloud</label>
+                    <input type="text" id="editEmailCloud" autocomplete="off" inputmode="email" autocapitalize="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Área</label>
+                    <select id="editArea">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Asistente Dirección">Asistente Dirección</option>
+                        <option value="Dirección de Marketing">Dirección de Marketing</option>
+                        <option value="Dirección Finanzas">Dirección Finanzas</option>
+                        <option value="Dirección General">Dirección General</option>
+                        <option value="Dirección Operaciones">Dirección Operaciones</option>
+                        <option value="Diseño Digital">Diseño Digital</option>
+                        <option value="Eventos y Congresos">Eventos y Congresos</option>
+                        <option value="IT">IT</option>
+                        <option value="Mercadotecnia">Mercadotecnia</option>
+                        <option value="RH">RH</option>
+                        <option value="Ventas">Ventas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Ubicación</label>
+                    <select id="editUbicacion">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Aguascalientes">Aguascalientes</option>
+                        <option value="Baja California">Baja California</option>
+                        <option value="Baja California Sur">Baja California Sur</option>
+                        <option value="Campeche">Campeche</option>
+                        <option value="CDMX">CDMX</option>
+                        <option value="Chiapas">Chiapas</option>
+                        <option value="Chihuahua">Chihuahua</option>
+                        <option value="Coahuila">Coahuila</option>
+                        <option value="Colima">Colima</option>
+                        <option value="Durango">Durango</option>
+                        <option value="Guanajuato">Guanajuato</option>
+                        <option value="Guerrero">Guerrero</option>
+                        <option value="Hidalgo">Hidalgo</option>
+                        <option value="Jalisco">Jalisco</option>
+                        <option value="Estado de México">Estado de México</option>
+                        <option value="Michoacán de Ocampo">Michoacán de Ocampo</option>
+                        <option value="Morelos">Morelos</option>
+                        <option value="Nayarit">Nayarit</option>
+                        <option value="Nuevo León">Nuevo León</option>
+                        <option value="Oaxaca">Oaxaca</option>
+                        <option value="Puebla">Puebla</option>
+                        <option value="Querétaro">Querétaro</option>
+                        <option value="Quintana Roo">Quintana Roo</option>
+                        <option value="San Luis Potosí">San Luis Potosí</option>
+                        <option value="Sinaloa">Sinaloa</option>
+                        <option value="Sonora">Sonora</option>
+                        <option value="Tabasco">Tabasco</option>
+                        <option value="Tamaulipas">Tamaulipas</option>
+                        <option value="Tlaxcala">Tlaxcala</option>
+                        <option value="Veracruz">Veracruz</option>
+                        <option value="Yucatán">Yucatán</option>
+                        <option value="Zacatecas">Zacatecas</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Observaciones</label>
+                    <textarea id="editObservaciones" rows="3"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+                        <button type="button" class="btn btn-outline" id="modalCerrarBtn">❌ Cancelar</button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast"></div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ============================================================
+    // 🔧 CONFIGURACIÓN - REEMPLAZA CON TU URL DE APPS SCRIPT
+    // ============================================================
+    const API_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+
+    // ============================================================
+    // ESTADO
+    // ============================================================
+    let todosDispositivos = [];
+    let editandoId = null;
+    let syncing = false;
+    let chartTipo = null, chartEstado = null, chartArea = null, chartUbicacion = null;
+
+    // ============================================================
+    // DOM
+    // ============================================================
+    const $ = id => document.getElementById(id);
+    const form = $('formDispositivo');
+    const formEditar = $('formEditar');
+    const listaEl = $('listaDispositivos');
+    const searchInput = $('searchInput');
+    const filterTipo = $('filterTipo');
+    const filterEstado = $('filterEstado');
+    const contadorRegistros = $('contadorRegistros');
+    const connectionBadge = $('connectionBadge');
+    const connectionText = $('connectionText');
+    const btnSync = $('btnSync');
+    const modal = $('modalEditar');
+    const modalFolio = $('modalFolio');
+    const toastEl = $('toast');
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(msg, type = 'info') {
+        toastEl.textContent = msg;
+        toastEl.className = 'toast toast-' + type + ' show';
+        clearTimeout(toastEl._t);
+        toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 3200);
+    }
+
+    // ============================================================
+    // CONEXIÓN
+    // ============================================================
+    function setConnection(state) {
+        connectionBadge.classList.remove('offline', 'syncing');
+        if (state === 'offline') {
+            connectionBadge.classList.add('offline');
+            connectionText.textContent = 'Sin conexión';
+        } else if (state === 'syncing') {
+            connectionBadge.classList.add('syncing');
+            connectionText.textContent = 'Sincronizando...';
+        } else {
+            connectionText.textContent = 'Conectado';
         }
-        
-        async function cargarDispositivos() {
-            setConnectionStatus('syncing');
-            try {
-                const data = await apiCall('GET');
-                todosDispositivos = Array.isArray(data) ? data : [];
-                aplicarFiltros();
-                setConnectionStatus('online');
-                return todosDispositivos;
-            } catch (error) {
-                console.error('Error cargando:', error);
-                setConnectionStatus('offline');
-                showToast('❌ Error al cargar: ' + error.message, 'error');
-                throw error;
-            }
+    }
+
+    // ============================================================
+    // API
+    // ============================================================
+    async function apiGet() {
+        if (API_URL.includes('PEGA_AQUI')) {
+            throw new Error('Configura la URL de Apps Script en API_URL');
         }
-        
-        async function crearDispositivo(data) {
-            const result = await apiCall('POST', { action: 'create', data: data });
-            await cargarDispositivos();
-            return result;
+        const res = await fetch(API_URL + '?action=list&t=' + Date.now(), { method: 'GET', redirect: 'follow' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error desconocido');
+        return json.data || [];
+    }
+
+    async function apiPost(body) {
+        if (API_URL.includes('PEGA_AQUI')) {
+            throw new Error('Configura la URL de Apps Script en API_URL');
         }
-        
-        async function actualizarDispositivo(id, data) {
-            const result = await apiCall('POST', { action: 'update', id: id, data: data });
-            await cargarDispositivos();
-            return result;
-        }
-        
-        async function eliminarDispositivo(id) {
-            const result = await apiCall('POST', { action: 'delete', id: id });
-            await cargarDispositivos();
-            return result;
-        }
-        
-        async function actualizarRapido(id, data) {
-            const result = await apiCall('POST', { action: 'quickUpdate', id: id, data: data });
-            await cargarDispositivos();
-            return result;
-        }
-        
-        // ============================================================
-        // INDICADOR DE CONEXIÓN
-        // ============================================================
-        function setConnectionStatus(status) {
-            connectionStatus.classList.remove('offline', 'syncing');
-            if (status === 'offline') {
-                connectionStatus.classList.add('offline');
-                connectionText.textContent = 'Sin conexión';
-            } else if (status === 'syncing') {
-                connectionStatus.classList.add('syncing');
-                connectionText.textContent = 'Sincronizando...';
-            } else {
-                connectionText.textContent = 'Conectado';
-            }
-        }
-        
-        // ============================================================
-        // SINCRONIZACIÓN
-        // ============================================================
-        async function sincronizar() {
-            if (syncing) return;
-            syncing = true;
-            btnSync.classList.add('spinning');
-            try {
-                await cargarDispositivos();
-                showToast('✅ Sincronizado', 'success');
-            } catch (e) {
-                // ya se maneja
-            } finally {
-                syncing = false;
-                btnSync.classList.remove('spinning');
-            }
-        }
-        
-        btnSync.addEventListener('click', sincronizar);
-        
-        window.addEventListener('online', () => {
-            isOnline = true;
-            showToast('🌐 Conexión restaurada, sincronizando...', 'info');
-            sincronizar();
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(body)
         });
-        
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            setConnectionStatus('offline');
-            showToast('📴 Sin conexión a internet', 'error');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error desconocido');
+        return json.data;
+    }
+
+    // ============================================================
+    // CARGAR
+    // ============================================================
+    async function cargar() {
+        setConnection('syncing');
+        try {
+            const data = await apiGet();
+            todosDispositivos = Array.isArray(data) ? data : [];
+            aplicarFiltros();
+            setConnection('online');
+            return todosDispositivos;
+        } catch (e) {
+            console.error(e);
+            setConnection('offline');
+            throw e;
+        }
+    }
+
+    async function sincronizar() {
+        if (syncing) return;
+        syncing = true;
+        btnSync.classList.add('spinning');
+        try {
+            await cargar();
+            showToast('✅ Sincronizado', 'success');
+        } catch (e) {
+            showToast('❌ ' + e.message, 'error');
+        } finally {
+            syncing = false;
+            btnSync.classList.remove('spinning');
+        }
+    }
+
+    // ============================================================
+    // HELPERS DE MAPEO (Sheet PascalCase ↔ form camelCase)
+    // ============================================================
+    function sheetToForm(d) {
+        return {
+            tipoDispositivo: d.Tipo || '',
+            estado: d.Estado || '',
+            marca: d.Marca || '',
+            modelo: d.Modelo || '',
+            numSerie: d.NumSerie || '',
+            color: d.Color || '',
+            capacidad: d.Capacidad || '',
+            sistemaOperativo: d.SistemaOperativo || '',
+            direccionMAC: d.DireccionMAC || '',
+            direccionIP: d.DireccionIP || '',
+            udid: d.UDID || '',
+            usuarioAsignado: d.UsuarioAsignado || '',
+            emailCloud: d.EmailCloud || '',
+            area: d.Area || '',
+            ubicacion: d.Ubicacion || '',
+            observaciones: d.Observaciones || '',
+            fechaAsignacion: d.FechaAsignacion || '',
+            fechaBaja: d.FechaBaja || ''
+        };
+    }
+
+    // ============================================================
+    // CONDITIONAL FIELDS - NUEVO
+    // ============================================================
+    const estadoSelect = $('estado');
+    const fechaAsignacionGroup = $('fechaAsignacionGroup');
+    const fechaBajaGroup = $('fechaBajaGroup');
+
+    function toggleCondFields(estado) {
+        fechaAsignacionGroup.classList.toggle('visible', estado === 'Asignado');
+        fechaBajaGroup.classList.toggle('visible', estado === 'Dado de baja');
+    }
+    estadoSelect.addEventListener('change', e => toggleCondFields(e.target.value));
+
+    // ============================================================
+    // CONDITIONAL FIELDS - EDITAR
+    // ============================================================
+    const editEstadoSelect = $('editEstado');
+    const editFechaAsignacionGroup = $('editFechaAsignacionGroup');
+    const editFechaBajaGroup = $('editFechaBajaGroup');
+
+    function toggleEditCondFields(estado) {
+        editFechaAsignacionGroup.classList.toggle('visible', estado === 'Asignado');
+        editFechaBajaGroup.classList.toggle('visible', estado === 'Dado de baja');
+    }
+    editEstadoSelect.addEventListener('change', e => toggleEditCondFields(e.target.value));
+
+    // ============================================================
+    // VALIDACIÓN
+    // ============================================================
+    function validateForm() {
+        let ok = true;
+        ['tipoDispositivo', 'estado'].forEach(id => {
+            const el = $(id);
+            const g = el.closest('.form-group');
+            if (!el.value) { g.classList.add('error'); ok = false; }
+            else g.classList.remove('error');
         });
-        
-        // ============================================================
-        // CONDITIONAL FIELDS
-        // ============================================================
-        const estadoSelect = document.getElementById('estado');
-        const fechaAsignacionGroup = document.getElementById('fechaAsignacionGroup');
-        const fechaBajaGroup = document.getElementById('fechaBajaGroup');
-        
-        function toggleConditionalFields(estado) {
-            fechaAsignacionGroup.classList.toggle('visible', estado === 'Asignado');
-            fechaBajaGroup.classList.toggle('visible', estado === 'Dado de baja');
+        return ok;
+    }
+
+    // ============================================================
+    // FORM: REGISTRAR
+    // ============================================================
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!validateForm()) return showToast('⚠️ Completa los campos obligatorios', 'error');
+
+        const estado = $('estado').value;
+        const data = {
+            tipoDispositivo: $('tipoDispositivo').value,
+            estado: estado,
+            marca: $('marca').value,
+            modelo: $('modelo').value.trim(),
+            numSerie: $('numSerie').value.trim(),
+            color: $('color').value,
+            capacidad: $('capacidad').value.trim(),
+            sistemaOperativo: $('sistemaOperativo').value,
+            direccionMAC: $('direccionMAC').value.trim(),
+            direccionIP: $('direccionIP').value.trim(),
+            udid: $('udid').value.trim(),
+            usuarioAsignado: $('usuarioAsignado').value.trim(),
+            emailCloud: $('emailCloud').value.trim(),
+            area: $('area').value,
+            ubicacion: $('ubicacion').value,
+            observaciones: $('observaciones').value.trim(),
+            fechaAsignacion: estado === 'Asignado' ? $('fechaAsignacion').value : '',
+            fechaBaja: estado === 'Dado de baja' ? $('fechaBaja').value : ''
+        };
+
+        try {
+            showToast('💾 Guardando...', 'info');
+            const result = await apiPost({ action: 'create', data });
+            form.reset();
+            document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
+            toggleCondFields('');
+            showToast(`✅ ${result.Folio || 'Dispositivo'} registrado`, 'success');
+            await cargar();
+        } catch (err) {
+            showToast('❌ ' + err.message, 'error');
         }
-        estadoSelect.addEventListener('change', (e) => toggleConditionalFields(e.target.value));
-        toggleConditionalFields(estadoSelect.value);
-        
-        // ============================================================
-        // MODAL
-        // ============================================================
-        const modal = document.getElementById('modalEditar');
-        const modalCerrar = document.getElementById('modalCerrar');
-        const modalCerrarBtn = document.getElementById('modalCerrarBtn');
-        const formEditar = document.getElementById('formEditar');
-        const modalFolio = document.getElementById('modalFolio');
-        let editandoId = null;
-        
-        const editEstadoSelect = document.getElementById('editEstado');
-        const editFechaAsignacionGroup = document.getElementById('editFechaAsignacionGroup');
-        const editFechaBajaGroup = document.getElementById('editFechaBajaGroup');
-        
-        function toggleEditConditionalFields(estado) {
-            editFechaAsignacionGroup.classList.toggle('visible', estado === 'Asignado');
-            editFechaBajaGroup.classList.toggle('visible', estado === 'Dado de baja');
+    });
+
+    // ============================================================
+    // FORM: RESET
+    // ============================================================
+    form.addEventListener('reset', () => {
+        document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
+        setTimeout(() => toggleCondFields(''), 0);
+    });
+
+    // ============================================================
+    // MODAL
+    // ============================================================
+    function abrirModal(d) {
+        editandoId = d.Folio || d.folio;
+        modalFolio.textContent = editandoId;
+        const f = sheetToForm(d);
+        $('editTipoDispositivo').value = f.tipoDispositivo;
+        $('editEstado').value = f.estado;
+        $('editMarca').value = f.marca;
+        $('editModelo').value = f.modelo;
+        $('editNumSerie').value = f.numSerie;
+        $('editColor').value = f.color;
+        $('editCapacidad').value = f.capacidad;
+        $('editSistemaOperativo').value = f.sistemaOperativo;
+        $('editDireccionMAC').value = f.direccionMAC;
+        $('editDireccionIP').value = f.direccionIP;
+        $('editUdid').value = f.udid;
+        $('editUsuarioAsignado').value = f.usuarioAsignado;
+        $('editEmailCloud').value = f.emailCloud;
+        $('editArea').value = f.area;
+        $('editUbicacion').value = f.ubicacion;
+        $('editObservaciones').value = f.observaciones;
+        $('editFechaAsignacion').value = f.fechaAsignacion;
+        $('editFechaBaja').value = f.fechaBaja;
+        toggleEditCondFields(f.estado);
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        editandoId = null;
+    }
+
+    $('modalCerrar').addEventListener('click', cerrarModal);
+    $('modalCerrarBtn').addEventListener('click', cerrarModal);
+    modal.addEventListener('click', e => { if (e.target === modal) cerrarModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('active')) cerrarModal(); });
+
+    // ============================================================
+    // FORM EDITAR
+    // ============================================================
+    formEditar.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!editandoId) return showToast('❌ No hay dispositivo seleccionado', 'error');
+
+        const estado = $('editEstado').value;
+        const data = {
+            tipoDispositivo: $('editTipoDispositivo').value,
+            estado: estado,
+            marca: $('editMarca').value,
+            modelo: $('editModelo').value.trim(),
+            numSerie: $('editNumSerie').value.trim(),
+            color: $('editColor').value,
+            capacidad: $('editCapacidad').value.trim(),
+            sistemaOperativo: $('editSistemaOperativo').value,
+            direccionMAC: $('editDireccionMAC').value.trim(),
+            direccionIP: $('editDireccionIP').value.trim(),
+            udid: $('editUdid').value.trim(),
+            usuarioAsignado: $('editUsuarioAsignado').value.trim(),
+            emailCloud: $('editEmailCloud').value.trim(),
+            area: $('editArea').value,
+            ubicacion: $('editUbicacion').value,
+            observaciones: $('editObservaciones').value.trim(),
+            fechaAsignacion: estado === 'Asignado' ? $('editFechaAsignacion').value : '',
+            fechaBaja: estado === 'Dado de baja' ? $('editFechaBaja').value : ''
+        };
+
+        if (!data.tipoDispositivo || !data.estado) return showToast('⚠️ Tipo y Estado obligatorios', 'error');
+
+        try {
+            showToast('💾 Guardando...', 'info');
+            await apiPost({ action: 'update', id: editandoId, data });
+            cerrarModal();
+            showToast('✅ Actualizado', 'success');
+            await cargar();
+        } catch (err) {
+            showToast('❌ ' + err.message, 'error');
         }
-        editEstadoSelect.addEventListener('change', (e) => toggleEditConditionalFields(e.target.value));
-        
-        function abrirModal(dispositivo) {
-            editandoId = dispositivo.id || dispositivo.Folio;
-            modalFolio.textContent = dispositivo.Folio || dispositivo.folio || 'INV-000000';
-            
-            // Mapeo: campos del Sheet → campos del formulario
-            document.getElementById('editTipoDispositivo').value = dispositivo.Tipo || '';
-            document.getElementById('editEstado').value = dispositivo.Estado || '';
-            document.getElementById('editMarca').value = dispositivo.Marca || '';
-            document.getElementById('editModelo').value = dispositivo.Modelo || '';
-            document.getElementById('editNumSerie').value = dispositivo.NumSerie || '';
-            document.getElementById('editColor').value = dispositivo.Color || '';
-            document.getElementById('editCapacidad').value = dispositivo.Capacidad || '';
-            document.getElementById('editSistemaOperativo').value = dispositivo.SistemaOperativo || '';
-            document.getElementById('editDireccionMAC').value = dispositivo.DireccionMAC || '';
-            document.getElementById('editDireccionIP').value = dispositivo.DireccionIP || '';
-            document.getElementById('editUdid').value = dispositivo.UDID || '';
-            document.getElementById('editUsuarioAsignado').value = dispositivo.UsuarioAsignado || '';
-            document.getElementById('editEmailCloud').value = dispositivo.EmailCloud || '';
-            document.getElementById('editArea').value = dispositivo.Area || '';
-            document.getElementById('editUbicacion').value = dispositivo.Ubicacion || '';
-            document.getElementById('editObservaciones').value = dispositivo.Observaciones || '';
-            document.getElementById('editFechaAsignacion').value = dispositivo.FechaAsignacion || '';
-            document.getElementById('editFechaBaja').value = dispositivo.FechaBaja || '';
-            
-            toggleEditConditionalFields(dispositivo.Estado || '');
-            modal.classList.add('active');
+    });
+
+    // ============================================================
+    // RENDER LISTA
+    // ============================================================
+    function renderLista(items) {
+        if (!items || items.length === 0) {
+            listaEl.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <h3>Sin dispositivos</h3>
+                    <p>Registra tu primer dispositivo usando el formulario.</p>
+                </div>`;
+            contadorRegistros.textContent = '0';
+            return;
         }
-        
-        function cerrarModal() {
-            modal.classList.remove('active');
-            editandoId = null;
-        }
-        
-        modalCerrar.addEventListener('click', cerrarModal);
-        modalCerrarBtn.addEventListener('click', cerrarModal);
-        modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
-        
-        // ============================================================
-        // GUARDAR EDICIÓN
-        // ============================================================
-        formEditar.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!editandoId) return showToast('❌ No hay dispositivo seleccionado', 'error');
-            
-            const estado = document.getElementById('editEstado').value;
-            const data = {
-                tipoDispositivo: document.getElementById('editTipoDispositivo').value,
-                estado: estado,
-                marca: document.getElementById('editMarca').value,
-                modelo: document.getElementById('editModelo').value.trim(),
-                numSerie: document.getElementById('editNumSerie').value.trim(),
-                color: document.getElementById('editColor').value,
-                capacidad: document.getElementById('editCapacidad').value.trim(),
-                sistemaOperativo: document.getElementById('editSistemaOperativo').value,
-                direccionMAC: document.getElementById('editDireccionMAC').value.trim(),
-                direccionIP: document.getElementById('editDireccionIP').value.trim(),
-                udid: document.getElementById('editUdid').value.trim(),
-                usuarioAsignado: document.getElementById('editUsuarioAsignado').value.trim(),
-                emailCloud: document.getElementById('editEmailCloud').value.trim(),
-                area: document.getElementById('editArea').value,
-                ubicacion: document.getElementById('editUbicacion').value,
-                observaciones: document.getElementById('editObservaciones').value.trim(),
-                fechaAsignacion: estado === 'Asignado' ? document.getElementById('editFechaAsignacion').value : '',
-                fechaBaja: estado === 'Dado de baja' ? document.getElementById('editFechaBaja').value : ''
-            };
-            
-            if (!data.tipoDispositivo || !data.estado) {
-                return showToast('⚠️ Tipo y Estado son obligatorios', 'error');
-            }
-            
-            try {
-                showToast('💾 Guardando...', 'info');
-                await actualizarDispositivo(editandoId, data);
-                showToast('✅ Actualizado correctamente', 'success');
-                cerrarModal();
-            } catch (error) {
-                showToast('❌ Error: ' + error.message, 'error');
-            }
-        });
-        
-        // ============================================================
-        // FORMATEAR FECHA
-        // ============================================================
-        function fmtFecha(str) {
-            if (!str) return '';
-            try {
-                // Si es formato Google Sheets (yyyy-mm-dd HH:mm:ss o ISO)
-                const d = new Date(str);
-                if (isNaN(d.getTime())) return str;
-                return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-            } catch { return str; }
-        }
-        
-        // ============================================================
-        // TOAST
-        // ============================================================
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast toast-${type} show`;
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-        
-        // ============================================================
-        // VALIDACIÓN
-        // ============================================================
-        function validateForm() {
-            let valid = true;
-            ['tipoDispositivo', 'estado'].forEach(id => {
-                const el = document.getElementById(id);
-                const group = el.closest('.form-group');
-                if (!el.value) { group.classList.add('error'); valid = false; }
-                else group.classList.remove('error');
-            });
-            return valid;
-        }
-        
-        // ============================================================
-        // REGISTRAR DISPOSITIVO
-        // ============================================================
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!validateForm()) return showToast('⚠️ Los campos con * son obligatorios', 'error');
-            
-            const estado = document.getElementById('estado').value;
-            const data = {
-                tipoDispositivo: document.getElementById('tipoDispositivo').value,
-                estado: estado,
-                marca: document.getElementById('marca').value,
-                modelo: document.getElementById('modelo').value.trim(),
-                numSerie: document.getElementById('numSerie').value.trim(),
-                color: document.getElementById('color').value,
-                capacidad: document.getElementById('capacidad').value.trim(),
-                sistemaOperativo: document.getElementById('sistemaOperativo').value,
-                direccionMAC: document.getElementById('direccionMAC').value.trim(),
-                direccionIP: document.getElementById('direccionIP').value.trim(),
-                udid: document.getElementById('udid').value.trim(),
-                usuarioAsignado: document.getElementById('usuarioAsignado').value.trim(),
-                emailCloud: document.getElementById('emailCloud').value.trim(),
-                area: document.getElementById('area').value,
-                ubicacion: document.getElementById('ubicacion').value,
-                observaciones: document.getElementById('observaciones').value.trim(),
-                fechaAsignacion: estado === 'Asignado' ? document.getElementById('fechaAsignacion').value : '',
-                fechaBaja: estado === 'Dado de baja' ? document.getElementById('fechaBaja').value : ''
-            };
-            
-            try {
-                showToast('💾 Registrando...', 'info');
-                const result = await crearDispositivo(data);
-                form.reset();
-                document.querySelectorAll('.form-group').forEach(g => g.classList.remove('error'));
-                toggleConditionalFields('');
-                showToast(`✅ ${result.Folio || result.folio} registrado`, 'success');
-            } catch (error) {
-                showToast('❌ Error: ' + error.message, 'error');
-            }
-        });
-        
-        // ============================================================
-        // RENDERIZAR LISTA (usa nombres de columna del Sheet)
-        // ============================================================
-        function renderizarLista(filtrados) {
-            if (!filtrados || filtrados.length === 0) {
-                listaEl.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>No hay dispositivos</h3><p>Registra tu primer dispositivo usando el formulario.</p></div>`;
-                contadorRegistros.textContent = '(0)';
-                return;
-            }
-            
-            contadorRegistros.textContent = `(${filtrados.length})`;
-            
-            listaEl.innerHTML = filtrados.map(d => {
-                const estado = d.Estado || '';
-                const statusClass = {
-                    'Asignado': 'status-asignado',
-                    'En reparación': 'status-enreparacion',
-                    'Almacenado': 'status-almacenado',
-                    'Dado de baja': 'status-dadobaja',
-                    'Prestado': 'status-prestado'
-                }[estado] || '';
-                
-                const folio = d.Folio || d.folio || '';
-                
-                return `
-                <div class="device-card" data-id="${folio}">
+
+        contadorRegistros.textContent = items.length;
+
+        listaEl.innerHTML = items.map((d, idx) => {
+            const estado = d.Estado || '';
+            const statusClass = {
+                'Asignado': 'status-asignado',
+                'En reparación': 'status-enreparacion',
+                'Almacenado': 'status-almacenado',
+                'Dado de baja': 'status-dadobaja',
+                'Prestado': 'status-prestado'
+            }[estado] || '';
+
+            const folio = d.Folio || d.folio || '';
+            const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            return `
+                <div class="device-card" style="animation-delay:${Math.min(idx * 30, 300)}ms" data-id="${esc(folio)}">
                     <div class="device-header">
-                        <span class="device-folio">${folio}</span>
-                        <span class="device-status ${statusClass}">${estado}</span>
+                        <span class="device-folio">${esc(folio)}</span>
+                        <span class="device-status ${statusClass}">${esc(estado)}</span>
                     </div>
                     <div class="device-details">
-                        <span><strong>Tipo:</strong> ${d.Tipo || 'N/A'}</span>
-                        <span><strong>Marca:</strong> ${d.Marca || 'N/A'}</span>
-                        <span><strong>Modelo:</strong> ${d.Modelo || 'N/A'}</span>
-                        <span><strong>Serie:</strong> ${d.NumSerie || 'N/A'}</span>
-                        <span><strong>Color:</strong> ${d.Color || 'N/A'}</span>
-                        <span><strong>Capacidad:</strong> ${d.Capacidad || 'N/A'}</span>
-                        <span><strong>SO:</strong> ${d.SistemaOperativo || 'N/A'}</span>
-                        <span><strong>MAC:</strong> ${d.DireccionMAC || 'N/A'}</span>
-                        <span><strong>IP:</strong> ${d.DireccionIP || 'N/A'}</span>
-                        <span><strong>UDID:</strong> ${d.UDID || 'N/A'}</span>
-                        <span><strong>Usuario:</strong> ${d.UsuarioAsignado || 'N/A'}</span>
-                        <span><strong>Email/Cloud:</strong> ${d.EmailCloud || 'N/A'}</span>
-                        <span><strong>Área:</strong> ${d.Area || 'N/A'}</span>
-                        <span><strong>Ubicación:</strong> ${d.Ubicacion || 'N/A'}</span>
-                        ${d.FechaAsignacion ? `<span><strong>Fecha Asignación:</strong> ${d.FechaAsignacion}</span>` : ''}
-                        ${d.FechaBaja ? `<span><strong>Fecha Baja:</strong> ${d.FechaBaja}</span>` : ''}
-                        <span><strong>Registro:</strong> ${fmtFecha(d.CreatedAt)}</span>
-                        ${d.Observaciones ? `<span style="grid-column:1/-1"><strong>Obs:</strong> ${d.Observaciones}</span>` : ''}
+                        <span><strong>Tipo</strong>${esc(d.Tipo) || 'N/A'}</span>
+                        <span><strong>Marca</strong>${esc(d.Marca) || 'N/A'}</span>
+                        <span><strong>Modelo</strong>${esc(d.Modelo) || 'N/A'}</span>
+                        <span><strong>Serie</strong>${esc(d.NumSerie) || 'N/A'}</span>
+                        <span><strong>Color</strong>${esc(d.Color) || 'N/A'}</span>
+                        <span><strong>Capacidad</strong>${esc(d.Capacidad) || 'N/A'}</span>
+                        <span><strong>SO</strong>${esc(d.SistemaOperativo) || 'N/A'}</span>
+                        <span><strong>MAC</strong>${esc(d.DireccionMAC) || 'N/A'}</span>
+                        <span><strong>IP</strong>${esc(d.DireccionIP) || 'N/A'}</span>
+                        <span><strong>UDID</strong>${esc(d.UDID) || 'N/A'}</span>
+                        <span><strong>Usuario</strong>${esc(d.UsuarioAsignado) || 'N/A'}</span>
+                        <span><strong>Email/Cloud</strong>${esc(d.EmailCloud) || 'N/A'}</span>
+                        <span><strong>Área</strong>${esc(d.Area) || 'N/A'}</span>
+                        <span><strong>Ubicación</strong>${esc(d.Ubicacion) || 'N/A'}</span>
+                        ${d.FechaAsignacion ? `<span><strong>F. Asignación</strong>${esc(d.FechaAsignacion)}</span>` : ''}
+                        ${d.FechaBaja ? `<span><strong>F. Baja</strong>${esc(d.FechaBaja)}</span>` : ''}
+                        ${d.Observaciones ? `<span class="full-span"><strong>Observaciones</strong>${esc(d.Observaciones)}</span>` : ''}
                     </div>
                     <div class="device-actions">
                         <select class="edit-estado">
                             ${['Asignado','En reparación','Almacenado','Dado de baja','Prestado'].map(s =>
-                                `<option ${estado===s?'selected':''}>${s}</option>`
+                                `<option ${estado === s ? 'selected' : ''}>${s}</option>`
                             ).join('')}
                         </select>
-                        <input class="edit-usuario" value="${d.UsuarioAsignado || ''}" placeholder="Usuario">
-                        <button class="btn btn-primary btn-sm guardar-cambio" data-id="${folio}">💾 Actualizar</button>
-                        <button class="btn btn-warning btn-sm editar-todo" data-id="${folio}">✏️ Editar</button>
-                        <button class="btn btn-danger btn-sm eliminar" data-id="${folio}">🗑️ Eliminar</button>
+                        <input class="edit-usuario" value="${esc(d.UsuarioAsignado)}" placeholder="Usuario" autocomplete="off">
+                        <button class="btn btn-primary btn-sm guardar-cambio" data-id="${esc(folio)}">💾</button>
+                        <button class="btn btn-warning btn-sm editar-todo" data-id="${esc(folio)}">✏️</button>
+                        <button class="btn btn-danger btn-sm eliminar" data-id="${esc(folio)}">🗑️</button>
                     </div>
                 </div>`;
-            }).join('');
-            
-            // Actualización rápida
-            document.querySelectorAll('.guardar-cambio').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const card = btn.closest('.device-card');
-                    const id = btn.dataset.id;
-                    const nuevoEstado = card.querySelector('.edit-estado').value;
-                    const nuevoUsuario = card.querySelector('.edit-usuario').value.trim();
-                    try {
-                        showToast('💾 Actualizando...', 'info');
-                        await actualizarRapido(id, { estado: nuevoEstado, usuarioAsignado: nuevoUsuario });
-                        showToast('✅ Actualizado', 'success');
-                    } catch (error) {
-                        showToast('❌ Error: ' + error.message, 'error');
-                    }
-                });
-            });
-            
-            // Editar todo
-            document.querySelectorAll('.editar-todo').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.dataset.id;
-                    const dispositivo = todosDispositivos.find(d => (d.Folio || d.folio) === id);
-                    if (dispositivo) abrirModal(dispositivo);
-                });
-            });
-            
-            // Eliminar
-            document.querySelectorAll('.eliminar').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const id = btn.dataset.id;
-                    if (confirm(`¿Eliminar ${id} permanentemente?`)) {
-                        try {
-                            showToast('🗑️ Eliminando...', 'info');
-                            await eliminarDispositivo(id);
-                            showToast(`🗑️ ${id} eliminado`, 'info');
-                        } catch (error) {
-                            showToast('❌ Error: ' + error.message, 'error');
-                        }
-                    }
-                });
-            });
-        }
-        
-        // ============================================================
-        // FILTRADO
-        // ============================================================
-        function aplicarFiltros() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const tipo = filterTipo.value;
-            const estado = filterEstado.value;
-            
-            const filtrados = todosDispositivos.filter(d => {
-                const search = !searchTerm || [
-                    d.Folio, d.Tipo, d.Marca, d.Modelo, d.UsuarioAsignado,
-                    d.NumSerie, d.UDID, d.Area, d.Ubicacion, d.EmailCloud
-                ].some(v => String(v || '').toLowerCase().includes(searchTerm));
-                const matchTipo = !tipo || d.Tipo === tipo;
-                const matchEstado = !estado || d.Estado === estado;
-                return search && matchTipo && matchEstado;
-            });
-            
-            renderizarLista(filtrados);
-            actualizarEstadisticas(filtrados);
-            actualizarGraficos(filtrados);
-        }
-        
-        // ============================================================
-        // ESTADÍSTICAS
-        // ============================================================
-        function actualizarEstadisticas(dispositivos) {
-            document.getElementById('totalDispositivos').textContent = dispositivos.length;
-            document.getElementById('asignados').textContent = dispositivos.filter(d => d.Estado === 'Asignado').length;
-            document.getElementById('enReparacion').textContent = dispositivos.filter(d => d.Estado === 'En reparación').length;
-            document.getElementById('almacenados').textContent = dispositivos.filter(d => d.Estado === 'Almacenado').length;
-            document.getElementById('prestados').textContent = dispositivos.filter(d => d.Estado === 'Prestado').length;
-            document.getElementById('dadosBaja').textContent = dispositivos.filter(d => d.Estado === 'Dado de baja').length;
-        }
-        
-        // ============================================================
-        // GRÁFICOS
-        // ============================================================
-        let chartTipo = null, chartEstado = null, chartArea = null, chartUbicacion = null;
-        
-        function actualizarGraficos(dispositivos) {
-            const coloresBase = ['#667eea','#764ba2','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316'];
-            
-            // Por Tipo
-            const tipos = {};
-            dispositivos.forEach(d => { const t = d.Tipo || 'Desconocido'; tipos[t] = (tipos[t]||0)+1; });
-            const labelsTipo = Object.keys(tipos);
-            const dataTipo = Object.values(tipos);
-            if (chartTipo) chartTipo.destroy();
-            chartTipo = new Chart(document.getElementById('chartTipo').getContext('2d'), {
-                type: 'doughnut',
-                data: { labels: labelsTipo.length ? labelsTipo : ['Sin datos'], datasets: [{ data: labelsTipo.length ? dataTipo : [1], backgroundColor: labelsTipo.length ? coloresBase.slice(0, labelsTipo.length) : ['#e5e7eb'], borderWidth: 2, borderColor: 'var(--bg-card)' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 }, color: 'var(--text-secondary)' } } }, cutout: '65%' }
-            });
-            
-            // Por Estado
-            const ordenEstados = ['Asignado','En reparación','Almacenado','Prestado','Dado de baja'];
-            const estados = {}; ordenEstados.forEach(e => estados[e] = 0);
-            dispositivos.forEach(d => { if (estados[d.Estado] !== undefined) estados[d.Estado]++; });
-            if (chartEstado) chartEstado.destroy();
-            chartEstado = new Chart(document.getElementById('chartEstado').getContext('2d'), {
-                type: 'bar',
-                data: { labels: Object.keys(estados), datasets: [{ label: 'Dispositivos', data: Object.values(estados), backgroundColor: ['#3b82f6','#ef4444','#f59e0b','#8b5cf6','#6b7280'], borderRadius: 8, borderSkipped: false }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' }, grid: { color: 'var(--border-color)' } }, x: { ticks: { color: 'var(--text-muted)', font: { size: 10 } }, grid: { display: false } } } }
-            });
-            
-            // Por Área
-            const areas = {};
-            dispositivos.forEach(d => { const a = d.Area || 'Sin asignar'; areas[a] = (areas[a]||0)+1; });
-            const labelsArea = Object.keys(areas);
-            if (chartArea) chartArea.destroy();
-            chartArea = new Chart(document.getElementById('chartArea').getContext('2d'), {
-                type: 'bar',
-                data: { labels: labelsArea.length ? labelsArea : ['Sin datos'], datasets: [{ label: 'Dispositivos', data: labelsArea.length ? Object.values(areas) : [1], backgroundColor: labelsArea.length ? coloresBase.slice(0, labelsArea.length) : ['#e5e7eb'], borderRadius: 8, borderSkipped: false }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' }, grid: { color: 'var(--border-color)' } }, x: { ticks: { color: 'var(--text-muted)', font: { size: 9 }, maxRotation: 45, minRotation: 30 }, grid: { display: false } } } }
-            });
-            
-            // Por Ubicación
-            const ubicaciones = {};
-            dispositivos.forEach(d => { const u = d.Ubicacion || 'Sin asignar'; ubicaciones[u] = (ubicaciones[u]||0)+1; });
-            const labelsUb = Object.keys(ubicaciones);
-            if (chartUbicacion) chartUbicacion.destroy();
-            chartUbicacion = new Chart(document.getElementById('chartUbicacion').getContext('2d'), {
-                type: 'bar',
-                data: { labels: labelsUb.length ? labelsUb : ['Sin datos'], datasets: [{ label: 'Dispositivos', data: labelsUb.length ? Object.values(ubicaciones) : [1], backgroundColor: labelsUb.length ? coloresBase.slice(0, labelsUb.length) : ['#e5e7eb'], borderRadius: 8, borderSkipped: false }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: 'var(--text-muted)' }, grid: { color: 'var(--border-color)' } }, x: { ticks: { color: 'var(--text-muted)', font: { size: 8 }, maxRotation: 45, minRotation: 30 }, grid: { display: false } } } }
-            });
-        }
-        
-        // ============================================================
-        // EXPORTAR CSV
-        // ============================================================
-        document.getElementById('btnExportar').addEventListener('click', async () => {
-            try {
-                const data = await apiCall('GET');
-                if (!data || data.length === 0) return showToast('No hay datos para exportar', 'info');
-                
-                const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt'];
-                
-                let csv = headers.join(';') + '\n';
-                data.forEach(d => {
-                    csv += headers.map(h => `"${String(d[h]||'').replace(/"/g,'""')}"`).join(';') + '\n';
-                });
-                
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
-                a.click();
-                showToast('📥 CSV exportado', 'success');
-            } catch (error) {
-                showToast('❌ Error al exportar: ' + error.message, 'error');
-            }
-        });
-        
-        // ============================================================
-        // FILTROS
-        // ============================================================
-        document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
-            searchInput.value = ''; filterTipo.value = ''; filterEstado.value = '';
-            aplicarFiltros();
-        });
-        searchInput.addEventListener('input', aplicarFiltros);
-        filterTipo.addEventListener('change', aplicarFiltros);
-        filterEstado.addEventListener('change', aplicarFiltros);
-        
-        // ============================================================
-        // TEMA
-        // ============================================================
-        const themeToggle = document.getElementById('themeToggle');
-        let darkMode = localStorage.getItem('theme') === 'dark' ||
-            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        
-        function applyTheme(dark) {
-            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-            themeToggle.textContent = dark ? '☀️' : '🌙';
-            localStorage.setItem('theme', dark ? 'dark' : 'light');
-        }
-        applyTheme(darkMode);
-        themeToggle.addEventListener('click', () => {
-            darkMode = !darkMode;
-            applyTheme(darkMode);
-            setTimeout(() => { if (todosDispositivos.length) actualizarGraficos(todosDispositivos); }, 100);
-        });
-        
-        // ============================================================
-        // AUTO-REFRESH cada 30 segundos
-        // ============================================================
-        setInterval(() => {
-            if (isOnline && !syncing && document.visibilityState === 'visible') {
-                cargarDispositivos().catch(() => {});
-            }
-        }, 30000);
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && isOnline) {
-                cargarDispositivos().catch(() => {});
-            }
-        });
-        
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
-        (async function init() {
-            setConnectionStatus(isOnline ? 'online' : 'offline');
-            if (!isOnline) {
-                showToast('📴 Sin conexión. Verifica tu internet.', 'error');
-                return;
-            }
-            await sincronizar();
-            console.log('📦 Inventario cargado (Google Sheets)');
-        })();
-        
-    })();
-    </script>
+        }).join('');
 
+        // Eventos
+        listaEl.querySelectorAll('.guardar-cambio').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const card = btn.closest('.device-card');
+                const id = btn.dataset.id;
+                const estado = card.querySelector('.edit-estado').value;
+                const usuario = card.querySelector('.edit-usuario').value.trim();
+                try {
+                    showToast('💾 Actualizando...', 'info');
+                    await apiPost({ action: 'quickUpdate', id, data: { estado, usuarioAsignado: usuario } });
+                    showToast('✅ Actualizado', 'success');
+                    await cargar();
+                } catch (e) { showToast('❌ ' + e.message, 'error'); }
+            });
+        });
+
+        listaEl.querySelectorAll('.editar-todo').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                const d = todosDispositivos.find(x => (x.Folio || x.folio) === id);
+                if (d) abrirModal(d);
+            });
+        });
+
+        listaEl.querySelectorAll('.eliminar').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                if (!confirm(`¿Eliminar ${id} permanentemente?`)) return;
+                try {
+                    showToast('🗑️ Eliminando...', 'info');
+                    await apiPost({ action: 'delete', id });
+                    showToast(`🗑️ ${id} eliminado`, 'info');
+                    await cargar();
+                } catch (e) { showToast('❌ ' + e.message, 'error'); }
+            });
+        });
+    }
+
+    // ============================================================
+    // FILTROS
+    // ============================================================
+    function aplicarFiltros() {
+        const term = searchInput.value.toLowerCase().trim();
+        const tipo = filterTipo.value;
+        const estado = filterEstado.value;
+
+        const filtrados = todosDispositivos.filter(d => {
+            const matchSearch = !term || [
+                d.Folio, d.Tipo, d.Marca, d.Modelo, d.UsuarioAsignado,
+                d.NumSerie, d.UDID, d.Area, d.Ubicacion, d.EmailCloud
+            ].some(v => String(v || '').toLowerCase().includes(term));
+            const matchTipo = !tipo || d.Tipo === tipo;
+            const matchEstado = !estado || d.Estado === estado;
+            return matchSearch && matchTipo && matchEstado;
+        });
+
+        renderLista(filtrados);
+        actualizarStats(filtrados);
+        actualizarGraficos(filtrados);
+    }
+
+    function actualizarStats(items) {
+        $('statTotal').textContent = items.length;
+        $('statAsignados').textContent = items.filter(d => d.Estado === 'Asignado').length;
+        $('statReparacion').textContent = items.filter(d => d.Estado === 'En reparación').length;
+        $('statAlmacenados').textContent = items.filter(d => d.Estado === 'Almacenado').length;
+        $('statPrestados').textContent = items.filter(d => d.Estado === 'Prestado').length;
+        $('statBaja').textContent = items.filter(d => d.Estado === 'Dado de baja').length;
+    }
+
+    // ============================================================
+    // GRÁFICOS
+    // ============================================================
+    function getThemeColors() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+            text: isDark ? '#cbd5e1' : '#475569',
+            muted: isDark ? '#94a3b8' : '#94a3b8',
+            grid: isDark ? '#1f2937' : '#e2e8f0',
+            bg: isDark ? '#161e2e' : '#ffffff'
+        };
+    }
+
+    function actualizarGraficos(items) {
+        const colores = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+        const t = getThemeColors();
+
+        // Por Tipo (doughnut)
+        const tipos = {};
+        items.forEach(d => { const k = d.Tipo || 'Desconocido'; tipos[k] = (tipos[k] || 0) + 1; });
+        const labelsT = Object.keys(tipos);
+        const dataT = Object.values(tipos);
+
+        if (chartTipo) chartTipo.destroy();
+        chartTipo = new Chart($('chartTipo'), {
+            type: 'doughnut',
+            data: {
+                labels: labelsT.length ? labelsT : ['Sin datos'],
+                datasets: [{
+                    data: labelsT.length ? dataT : [1],
+                    backgroundColor: labelsT.length ? colores.slice(0, labelsT.length) : ['#e5e7eb'],
+                    borderWidth: 3,
+                    borderColor: t.bg,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 10, padding: 10, font: { size: 11, weight: '600' }, color: t.text, usePointStyle: true, pointStyle: 'circle' }
+                    }
+                }
+            }
+        });
+
+        // Por Estado
+        const orden = ['Asignado', 'En reparación', 'Almacenado', 'Prestado', 'Dado de baja'];
+        const counts = {};
+        orden.forEach(e => counts[e] = 0);
+        items.forEach(d => { if (counts[d.Estado] !== undefined) counts[d.Estado]++; });
+
+        if (chartEstado) chartEstado.destroy();
+        chartEstado = new Chart($('chartEstado'), {
+            type: 'bar',
+            data: {
+                labels: orden,
+                datasets: [{
+                    data: Object.values(counts),
+                    backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#6b7280'],
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    barThickness: 'flex',
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, color: t.muted, font: { size: 10 } }, grid: { color: t.grid, drawBorder: false } },
+                    x: { ticks: { color: t.muted, font: { size: 9, weight: '600' } }, grid: { display: false } }
+                }
+            }
+        });
+
+        // Por Área
+        const areas = {};
+        items.forEach(d => { const k = d.Area || 'Sin asignar'; areas[k] = (areas[k] || 0) + 1; });
+        const labelsA = Object.keys(areas);
+
+        if (chartArea) chartArea.destroy();
+        chartArea = new Chart($('chartArea'), {
+            type: 'bar',
+            data: {
+                labels: labelsA.length ? labelsA : ['Sin datos'],
+                datasets: [{
+                    data: labelsA.length ? Object.values(areas) : [1],
+                    backgroundColor: labelsA.length ? colores.slice(0, labelsA.length) : ['#e5e7eb'],
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, color: t.muted, font: { size: 10 } }, grid: { color: t.grid, drawBorder: false } },
+                    x: { ticks: { color: t.muted, font: { size: 8, weight: '600' }, maxRotation: 45, minRotation: 30 }, grid: { display: false } }
+                }
+            }
+        });
+
+        // Por Ubicación
+        const ubic = {};
+        items.forEach(d => { const k = d.Ubicacion || 'Sin asignar'; ubic[k] = (ubic[k] || 0) + 1; });
+        const labelsU = Object.keys(ubic);
+
+        if (chartUbicacion) chartUbicacion.destroy();
+        chartUbicacion = new Chart($('chartUbicacion'), {
+            type: 'bar',
+            data: {
+                labels: labelsU.length ? labelsU : ['Sin datos'],
+                datasets: [{
+                    data: labelsU.length ? Object.values(ubic) : [1],
+                    backgroundColor: labelsU.length ? colores.slice(0, labelsU.length) : ['#e5e7eb'],
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, color: t.muted, font: { size: 10 } }, grid: { color: t.grid, drawBorder: false } },
+                    x: { ticks: { color: t.muted, font: { size: 8, weight: '600' }, maxRotation: 45, minRotation: 30 }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // ============================================================
+    // EXPORTAR CSV
+    // ============================================================
+    $('btnExportar').addEventListener('click', () => {
+        if (!todosDispositivos.length) return showToast('No hay datos para exportar', 'info');
+        const headers = ['Folio','Tipo','Estado','FechaAsignacion','FechaBaja','Marca','Modelo','NumSerie','Color','Capacidad','SistemaOperativo','DireccionMAC','DireccionIP','UDID','UsuarioAsignado','EmailCloud','Area','Ubicacion','Observaciones','CreatedAt','UpdatedAt'];
+        let csv = headers.join(';') + '\n';
+        todosDispositivos.forEach(d => {
+            csv += headers.map(h => `"${String(d[h] || '').replace(/"/g, '""')}"`).join(';') + '\n';
+        });
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('📥 CSV exportado', 'success');
+    });
+
+    // ============================================================
+    // FILTROS - EVENTOS
+    // ============================================================
+    $('btnLimpiarFiltros').addEventListener('click', () => {
+        searchInput.value = '';
+        filterTipo.value = '';
+        filterEstado.value = '';
+        aplicarFiltros();
+    });
+
+    let filtroTimeout;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(filtroTimeout);
+        filtroTimeout = setTimeout(aplicarFiltros, 180);
+    });
+    filterTipo.addEventListener('change', aplicarFiltros);
+    filterEstado.addEventListener('change', aplicarFiltros);
+
+    // ============================================================
+    // TEMA
+    // ============================================================
+    const themeToggle = $('themeToggle');
+    let darkMode = localStorage.getItem('theme') === 'dark' ||
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    function applyTheme(dark) {
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        themeToggle.textContent = dark ? '☀️' : '🌙';
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+    applyTheme(darkMode);
+
+    themeToggle.addEventListener('click', () => {
+        darkMode = !darkMode;
+        applyTheme(darkMode);
+        setTimeout(() => { if (todosDispositivos.length) actualizarGraficos(todosDispositivos); }, 120);
+    });
+
+    // ============================================================
+    // CONEXIÓN - EVENTOS
+    // ============================================================
+    window.addEventListener('online', () => {
+        showToast('🌐 Conexión restaurada', 'info');
+        sincronizar();
+    });
+    window.addEventListener('offline', () => {
+        setConnection('offline');
+        showToast('📴 Sin conexión', 'error');
+    });
+
+    btnSync.addEventListener('click', sincronizar);
+
+    // ============================================================
+    // AUTO-REFRESH cada 60s
+    // ============================================================
+    setInterval(() => {
+        if (navigator.onLine && !syncing && document.visibilityState === 'visible') {
+            cargar().catch(() => {});
+        }
+    }, 60000);
+
+    // Refrescar al volver a la pestaña
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && navigator.onLine && !syncing) {
+            cargar().catch(() => {});
+        }
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    (async function init() {
+        if (!navigator.onLine) {
+            setConnection('offline');
+            showToast('📴 Sin conexión a internet', 'error');
+            return;
+        }
+        await sincronizar();
+        console.log('📦 Inventario cargado');
+    })();
+
+})();
+</script>
 </body>
 </html>
