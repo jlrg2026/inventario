@@ -424,7 +424,8 @@ body::before {
 .form-group textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 .form-group.error input,
-.form-group.error select { border-color: #ff3d5c; background: rgba(255,61,92,.05); }
+.form-group.error select,
+.form-group.error textarea { border-color: #ff3d5c; background: rgba(255,61,92,.05); }
 .form-group .error-msg {
     font-size: 11px; color: #ff3d5c;
     display: none; font-weight: 600;
@@ -911,8 +912,8 @@ body::before {
                 </div>
 
                 <div class="form-group">
-                    <label>Marca</label>
-                    <select id="marca">
+                    <label>Marca <span class="required">*</span></label>
+                    <select id="marca" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="Acer">Acer</option>
                         <option value="Asus">Asus</option>
@@ -929,44 +930,50 @@ body::before {
                         <option value="Vivo">Vivo</option>
                         <option value="Xiaomi">Xiaomi</option>
                     </select>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Modelo</label>
+                    <label>Modelo <span class="required">*</span></label>
                     <input type="text" id="modelo" placeholder="Ej: iPad Air 5, Galaxy S23..." autocomplete="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Número de Serie</label>
+                    <label>Número de Serie <span class="required">*</span></label>
                     <input type="text" id="numSerie" placeholder="Ej: F2LJQK1234" autocomplete="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <!-- NUEVOS CAMPOS AQUÍ -->
                 <div class="form-group">
-                    <label>IMEI</label>
+                    <label>IMEI <span class="required">*</span></label>
                     <input type="text" id="imei" placeholder="Ej: 123456789012345" autocomplete="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Número celular</label>
+                    <label>Número celular <span class="required">*</span></label>
                     <input type="text" id="numeroCelular" placeholder="Ej: 5512345678" autocomplete="off" inputmode="tel">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Proveedor</label>
-                    <select id="proveedor">
+                    <label>Proveedor <span class="required">*</span></label>
+                    <select id="proveedor" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="AT&T">AT&T</option>
                         <option value="Otro">Otro</option>
                         <option value="Telcel">Telcel</option>
                         <option value="Virgin Mobile">Virgin Mobile</option>
                     </select>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
                 <!-- FIN NUEVOS CAMPOS -->
 
                 <div class="form-group">
-                    <label>Color</label>
-                    <select id="color">
+                    <label>Color <span class="required">*</span></label>
+                    <select id="color" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="Azul">Azul</option>
                         <option value="Blanco">Blanco</option>
@@ -978,16 +985,18 @@ body::before {
                         <option value="Rojo">Rojo</option>
                         <option value="Verde">Verde</option>
                     </select>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Capacidad / Almacenamiento</label>
+                    <label>Capacidad / Almacenamiento <span class="required">*</span></label>
                     <input type="text" id="capacidad" placeholder="Ej: 128GB, 512GB SSD..." autocomplete="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Sistema Operativo</label>
-                    <select id="sistemaOperativo">
+                    <label>Sistema Operativo <span class="required">*</span></label>
+                    <select id="sistemaOperativo" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="Android">Android</option>
                         <option value="iOS">iOS</option>
@@ -998,36 +1007,42 @@ body::before {
                         <option value="Windows 11 Home">Windows 11 Home</option>
                         <option value="Windows 11 Pro">Windows 11 Pro</option>
                     </select>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Dirección MAC</label>
+                    <label>Dirección MAC <span class="required">*</span></label>
                     <input type="text" id="direccionMAC" placeholder="Ej: 00:1A:2B:3C:4D:5E" autocomplete="off" autocapitalize="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Dirección IP</label>
+                    <label>Dirección IP <span class="required">*</span></label>
                     <input type="text" id="direccionIP" placeholder="Ej: 192.168.1.10" autocomplete="off" inputmode="decimal">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>UDID</label>
+                    <label>UDID <span class="required">*</span></label>
                     <input type="text" id="udid" placeholder="Ej: 00008020-001E2D8A3A..." autocomplete="off" autocapitalize="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Usuario Asignado</label>
+                    <label>Usuario Asignado <span class="required">*</span></label>
                     <input type="text" id="usuarioAsignado" placeholder="Nombre del responsable" autocomplete="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>EMAIL / ID Cloud</label>
+                    <label>EMAIL / ID Cloud <span class="required">*</span></label>
                     <input type="text" id="emailCloud" placeholder="Ej: usuario@empresa.com" autocomplete="off" inputmode="email" autocapitalize="off">
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Área</label>
-                    <select id="area">
+                    <label>Área <span class="required">*</span></label>
+                    <select id="area" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="Administración">Administración</option>
                         <option value="Asistente Dirección">Asistente Dirección</option>
@@ -1042,11 +1057,12 @@ body::before {
                         <option value="RH">RH</option>
                         <option value="Ventas">Ventas</option>
                     </select>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group">
-                    <label>Ubicación</label>
-                    <select id="ubicacion">
+                    <label>Ubicación <span class="required">*</span></label>
+                    <select id="ubicacion" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="Aguascalientes">Aguascalientes</option>
                         <option value="Baja California">Baja California</option>
@@ -1081,11 +1097,13 @@ body::before {
                         <option value="Yucatán">Yucatán</option>
                         <option value="Zacatecas">Zacatecas</option>
                     </select>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group full-width">
-                    <label>Observaciones</label>
-                    <textarea id="observaciones" rows="3" placeholder="Notas adicionales..."></textarea>
+                    <label>Observaciones <span class="required">*</span></label>
+                    <textarea id="observaciones" rows="3" placeholder="Notas adicionales..." required></textarea>
+                    <span class="error-msg">Campo obligatorio</span>
                 </div>
 
                 <div class="form-group full-width">
@@ -1667,25 +1685,108 @@ body::before {
     editEstadoSelect.addEventListener('change', e => toggleEditCondFields(e.target.value));
 
     // ============================================================
-    // VALIDACIÓN
+    // VALIDACIÓN (TODOS LOS CAMPOS OBLIGATORIOS)
     // ============================================================
+    // IDs de todos los campos obligatorios del formulario "Nuevo Dispositivo"
+    const CAMPOS_OBLIGATORIOS = [
+        'tipoDispositivo',
+        'estado',
+        'marca',
+        'modelo',
+        'numSerie',
+        'imei',
+        'numeroCelular',
+        'proveedor',
+        'color',
+        'capacidad',
+        'sistemaOperativo',
+        'direccionMAC',
+        'direccionIP',
+        'udid',
+        'usuarioAsignado',
+        'emailCloud',
+        'area',
+        'ubicacion',
+        'observaciones'
+    ];
+
     function validateForm() {
         let ok = true;
-        ['tipoDispositivo', 'estado'].forEach(id => {
+        let primerError = null;
+
+        CAMPOS_OBLIGATORIOS.forEach(id => {
             const el = $(id);
+            if (!el) return;
             const g = el.closest('.form-group');
-            if (!el.value) { g.classList.add('error'); ok = false; }
-            else g.classList.remove('error');
+            const valor = (el.value || '').trim();
+
+            if (!valor) {
+                g.classList.add('error');
+                ok = false;
+                if (!primerError) primerError = el;
+            } else {
+                g.classList.remove('error');
+            }
         });
+
+        // Si el estado es Asignado, la fecha es obligatoria; si es Dado de baja, también
+        const estado = $('estado').value;
+        if (estado === 'Asignado') {
+            const f = $('fechaAsignacion');
+            const g = f.closest('.form-group');
+            if (!f.value) {
+                g.classList.add('error');
+                ok = false;
+                if (!primerError) primerError = f;
+            } else {
+                g.classList.remove('error');
+            }
+        }
+        if (estado === 'Dado de baja') {
+            const f = $('fechaBaja');
+            const g = f.closest('.form-group');
+            if (!f.value) {
+                g.classList.add('error');
+                ok = false;
+                if (!primerError) primerError = f;
+            } else {
+                g.classList.remove('error');
+            }
+        }
+
+        if (primerError) {
+            try { primerError.focus({ preventScroll: false }); } catch (e) {}
+            primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
         return ok;
     }
+
+    // Limpia el estado de error al escribir/cambiar en cualquier campo obligatorio
+    CAMPOS_OBLIGATORIOS.forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+        el.addEventListener(evt, () => {
+            const g = el.closest('.form-group');
+            if ((el.value || '').trim()) g.classList.remove('error');
+        });
+    });
+    ['fechaAsignacion', 'fechaBaja'].forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener('change', () => {
+            const g = el.closest('.form-group');
+            if (el.value) g.classList.remove('error');
+        });
+    });
 
     // ============================================================
     // FORM: REGISTRAR
     // ============================================================
     form.addEventListener('submit', async e => {
         e.preventDefault();
-        if (!validateForm()) return showToast('Completa los campos obligatorios', 'error');
+        if (!validateForm()) return showToast('Completa todos los campos obligatorios', 'error');
 
         const estado = $('estado').value;
         const data = {
@@ -2182,14 +2283,15 @@ body::before {
                 xPos += 45;
             });
 
-            // Tabla
-            const headers = [['Folio', 'Tipo', 'Marca', 'Modelo', 'Serie', 'Usuario', 'Área', 'Ubicación', 'Estado']];
+            // Tabla (con columna "Número celular" después de "Serie")
+            const headers = [['Folio', 'Tipo', 'Marca', 'Modelo', 'Serie', 'Número celular', 'Usuario', 'Área', 'Ubicación', 'Estado']];
             const rows = items.map(d => [
                 d.Folio || '',
                 d.Tipo || '',
                 d.Marca || '',
                 (d.Modelo || '').slice(0, 25),
                 (d.NumSerie || '').slice(0, 18),
+                d.NumeroCelular || '',
                 (d.UsuarioAsignado || '').slice(0, 20),
                 (d.Area || '').slice(0, 18),
                 (d.Ubicacion || '').slice(0, 18),
@@ -2217,7 +2319,7 @@ body::before {
                 alternateRowStyles: { fillColor: [245, 248, 255] },
                 columnStyles: {
                     0: { cellWidth: 22, fontStyle: 'bold', textColor: [0, 102, 255] },
-                    8: { cellWidth: 26, fontStyle: 'bold' }
+                    9: { cellWidth: 26, fontStyle: 'bold' }
                 },
                 didDrawPage: (data) => {
                     const pageCount = doc.internal.getNumberOfPages();
@@ -2603,7 +2705,7 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             return;
         }
         await sincronizar();
-        console.log('📦 Inventario cargado · Azul Tecnológico · v2.1 (sin fotos)');
+        console.log('📦 Inventario cargado · Azul Tecnológico · v2.2 (validación total + PDF con Núm. celular)');
     })();
 
 })();
