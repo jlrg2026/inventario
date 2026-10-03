@@ -963,6 +963,7 @@ body::before {
                     <select id="proveedor" required>
                         <option value="">-- Seleccionar --</option>
                         <option value="AT&T">AT&T</option>
+                        <option value="No aplica">No aplica</option>
                         <option value="Otro">Otro</option>
                         <option value="Telcel">Telcel</option>
                         <option value="Virgin Mobile">Virgin Mobile</option>
@@ -990,7 +991,15 @@ body::before {
 
                 <div class="form-group">
                     <label>Capacidad / Almacenamiento <span class="required">*</span></label>
-                    <input type="text" id="capacidad" placeholder="Ej: 128GB, 512GB SSD..." autocomplete="off">
+                    <select id="capacidad" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="64 GB">64 GB</option>
+                        <option value="128 GB">128 GB</option>
+                        <option value="256 GB">256 GB</option>
+                        <option value="500 GB">500 GB</option>
+                        <option value="1 TB">1 TB</option>
+                        <option value="Otro">Otro</option>
+                    </select>
                     <span class="error-msg">Campo obligatorio</span>
                 </div>
 
@@ -1276,6 +1285,7 @@ body::before {
                     <select id="editProveedor">
                         <option value="">-- Seleccionar --</option>
                         <option value="AT&T">AT&T</option>
+                        <option value="No aplica">No aplica</option>
                         <option value="Otro">Otro</option>
                         <option value="Telcel">Telcel</option>
                         <option value="Virgin Mobile">Virgin Mobile</option>
@@ -1301,7 +1311,15 @@ body::before {
 
                 <div class="form-group">
                     <label>Capacidad</label>
-                    <input type="text" id="editCapacidad" autocomplete="off">
+                    <select id="editCapacidad">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="64 GB">64 GB</option>
+                        <option value="128 GB">128 GB</option>
+                        <option value="256 GB">256 GB</option>
+                        <option value="500 GB">500 GB</option>
+                        <option value="1 TB">1 TB</option>
+                        <option value="Otro">Otro</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1799,7 +1817,7 @@ body::before {
             numeroCelular: $('numeroCelular').value.trim(),
             proveedor: $('proveedor').value,
             color: $('color').value,
-            capacidad: $('capacidad').value.trim(),
+            capacidad: $('capacidad').value,
             sistemaOperativo: $('sistemaOperativo').value,
             direccionMAC: $('direccionMAC').value.trim(),
             direccionIP: $('direccionIP').value.trim(),
@@ -1901,7 +1919,7 @@ body::before {
             numeroCelular: $('editNumeroCelular').value.trim(),
             proveedor: $('editProveedor').value,
             color: $('editColor').value,
-            capacidad: $('editCapacidad').value.trim(),
+            capacidad: $('editCapacidad').value,
             sistemaOperativo: $('editSistemaOperativo').value,
             direccionMAC: $('editDireccionMAC').value.trim(),
             direccionIP: $('editDireccionIP').value.trim(),
@@ -2705,7 +2723,7 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             return;
         }
         await sincronizar();
-        console.log('📦 Inventario cargado · Azul Tecnológico · v2.2 (validación total + PDF con Núm. celular)');
+        console.log('📦 Inventario cargado · Azul Tecnológico · v2.3 (Proveedor No aplica + Capacidad select)');
     })();
 
 })();
