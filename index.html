@@ -1480,6 +1480,51 @@ body::before {
     </div>
 </div>
 
+<!-- ===== MODAL FILTRO PDF (NUEVO) ===== -->
+<div class="modal-overlay" id="modalPdfFiltro">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>
+                <svg class="icon"><use href="#i-file-down"/></svg>
+                Reporte PDF · <span>Filtro</span>
+            </h3>
+            <button class="modal-close" id="modalPdfCerrar" aria-label="Cerrar">&times;</button>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Filtrar por</label>
+                <select id="pdfCriterio">
+                    <option value="">Sin filtro (todos)</option>
+                    <option value="Tipo">Tipo</option>
+                    <option value="Estado">Estado</option>
+                    <option value="Area">Área</option>
+                    <option value="Ubicacion">Ubicación</option>
+                    <option value="Modelo">Modelo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Valor</label>
+                <select id="pdfValor" disabled>
+                    <option value="">-- Selecciona un criterio --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="template-actions" style="margin-top:18px;">
+            <button type="button" class="btn btn-primary" id="btnGenerarPdfFiltrado">
+                <svg class="icon icon-sm"><use href="#i-file-down"/></svg>
+                Generar PDF
+            </button>
+            <button type="button" class="btn btn-outline" id="btnCancelarPdfFiltro">
+                <svg class="icon icon-sm"><use href="#i-x"/></svg>
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- ===== TOAST ===== -->
 <div id="toast" class="toast"></div>
 
@@ -1898,6 +1943,7 @@ body::before {
         if (e.key === 'Escape') {
             if (modal.classList.contains('active')) cerrarModal();
             if ($('modalPlantillas').classList.contains('active')) cerrarModalPlantillas();
+            if ($('modalPdfFiltro').classList.contains('active')) cerrarModalPdfFiltro();
         }
     });
 
@@ -2238,12 +2284,77 @@ body::before {
     }
 
     // ============================================================
-    // REPORTE PDF
+    // REPORTE PDF (con filtro previo)
     // ============================================================
-    $('btnReportePDF').addEventListener('click', () => {
-        const items = window._filtrados || todosDispositivos;
-        if (!items.length) return showToast('No hay datos para el reporte', 'info');
+    function obtenerValoresUnicos(campo) {
+        const set = new Set();
+        (todosDispositivos || []).forEach(d => {
+            const v = (d[campo] || '').toString().trim();
+            if (v) set.add(v);
+        });
+        return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+    }
 
+    function abrirModalPdfFiltro() {
+        $('pdfCriterio').value = '';
+        const valSel = $('pdfValor');
+        valSel.innerHTML = '<option value="">-- Selecciona un criterio --</option>';
+        valSel.disabled = true;
+        $('modalPdfFiltro').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModalPdfFiltro() {
+        $('modalPdfFiltro').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    $('btnReportePDF').addEventListener('click', abrirModalPdfFiltro);
+    $('modalPdfCerrar').addEventListener('click', cerrarModalPdfFiltro);
+    $('btnCancelarPdfFiltro').addEventListener('click', cerrarModalPdfFiltro);
+    $('modalPdfFiltro').addEventListener('click', e => {
+        if (e.target === $('modalPdfFiltro')) cerrarModalPdfFiltro();
+    });
+
+    $('pdfCriterio').addEventListener('change', e => {
+        const campo = e.target.value;
+        const valSel = $('pdfValor');
+        if (!campo) {
+            valSel.innerHTML = '<option value="">-- Selecciona un criterio --</option>';
+            valSel.disabled = true;
+            return;
+        }
+        const valores = obtenerValoresUnicos(campo);
+        valSel.innerHTML = '<option value="">-- Todos --</option>' +
+            valores.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${String(v)}</option>`).join('');
+        valSel.disabled = false;
+    });
+
+    $('btnGenerarPdfFiltrado').addEventListener('click', () => {
+        const campo = $('pdfCriterio').value;
+        const valor = $('pdfValor').value;
+
+        let items = todosDispositivos.slice();
+        let etiquetaFiltro = 'Sin filtro (todos)';
+
+        if (campo && valor) {
+            items = items.filter(d => String(d[campo] || '').trim() === valor);
+            const nombres = { Tipo: 'Tipo', Estado: 'Estado', Area: 'Área', Ubicacion: 'Ubicación', Modelo: 'Modelo' };
+            etiquetaFiltro = `${nombres[campo] || campo}: ${valor}`;
+        } else if (campo && !valor) {
+            const nombres = { Tipo: 'Tipo', Estado: 'Estado', Area: 'Área', Ubicacion: 'Ubicación', Modelo: 'Modelo' };
+            etiquetaFiltro = `${nombres[campo] || campo}: Todos`;
+        }
+
+        if (!items.length) {
+            return showToast('No hay dispositivos con ese filtro', 'info');
+        }
+
+        cerrarModalPdfFiltro();
+        generarReportePDF(items, etiquetaFiltro);
+    });
+
+    function generarReportePDF(items, etiquetaFiltro) {
         try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -2273,11 +2384,16 @@ body::before {
             doc.text(`Generado: ${fecha} ${hora}`, pageW - 14, 12, { align: 'right' });
             doc.text(`Total: ${items.length} dispositivos`, pageW - 14, 18, { align: 'right' });
 
-            // Resumen de estados
+            // Filtro aplicado
             doc.setTextColor(10, 22, 40);
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
             doc.text('Resumen por estado', 14, 34);
+
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(71, 85, 105);
+            doc.text(`Filtro aplicado → ${etiquetaFiltro}`, 14, 40);
 
             const estados = ['Asignado', 'En reparación', 'Almacenado', 'Prestado', 'Dado de baja'];
             const counts = {};
@@ -2289,15 +2405,15 @@ body::before {
             let xPos = 14;
             estados.forEach(e => {
                 doc.setFillColor(230, 240, 255);
-                doc.roundedRect(xPos, 38, 42, 12, 2, 2, 'F');
+                doc.roundedRect(xPos, 44, 42, 12, 2, 2, 'F');
                 doc.setTextColor(0, 102, 255);
                 doc.setFont(undefined, 'bold');
                 doc.setFontSize(13);
-                doc.text(String(counts[e]), xPos + 21, 44, { align: 'center' });
+                doc.text(String(counts[e]), xPos + 21, 50, { align: 'center' });
                 doc.setFontSize(7);
                 doc.setFont(undefined, 'normal');
                 doc.setTextColor(71, 85, 105);
-                doc.text(e.toUpperCase(), xPos + 21, 48, { align: 'center' });
+                doc.text(e.toUpperCase(), xPos + 21, 54, { align: 'center' });
                 xPos += 45;
             });
 
@@ -2319,7 +2435,7 @@ body::before {
             doc.autoTable({
                 head: headers,
                 body: rows,
-                startY: 56,
+                startY: 62,
                 theme: 'grid',
                 styles: {
                     fontSize: 8,
@@ -2353,7 +2469,10 @@ body::before {
                 }
             });
 
-            const nombre = `reporte_inventario_${new Date().toISOString().slice(0, 10)}.pdf`;
+            const sufijo = etiquetaFiltro && etiquetaFiltro !== 'Sin filtro (todos)'
+                ? '_' + etiquetaFiltro.replace(/[^\w\d]+/g, '_').slice(0, 30)
+                : '';
+            const nombre = `reporte_inventario_${new Date().toISOString().slice(0, 10)}${sufijo}.pdf`;
             doc.save(nombre);
             showToast('Reporte PDF descargado', 'success');
             notificar('Reporte PDF generado', `${items.length} dispositivos incluidos`);
@@ -2361,7 +2480,7 @@ body::before {
             console.error(e);
             showToast('Error al generar PDF: ' + e.message, 'error');
         }
-    });
+    }
 
     // ============================================================
     // EXPORTAR CSV
@@ -2723,7 +2842,7 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             return;
         }
         await sincronizar();
-        console.log('📦 Inventario cargado · Azul Tecnológico · v2.3 (Proveedor No aplica + Capacidad select)');
+        console.log('📦 Inventario cargado · Azul Tecnológico · v2.4 (PDF con filtro por Tipo/Estado/Área/Ubicación/Modelo)');
     })();
 
 })();
