@@ -2961,7 +2961,8 @@ body::before {
             doc.setFont(undefined, 'normal');
             doc.text(`Total: ${items.length} · ${etiquetaFiltro}`, pageW - 14, 8, { align: 'right' });
 
-            const headers = [['Folio', 'Tipo', 'Marca', 'Modelo', 'Serie', 'IMEI', 'Núm. Cel', 'Proveedor', 'Usuario', 'Área', 'Ubicación', 'Estado']];
+            // >>> COLUMNA OBSERVACIONES AGREGADA <<<
+            const headers = [['Folio', 'Tipo', 'Marca', 'Modelo', 'Serie', 'IMEI', 'Núm. Cel', 'Proveedor', 'Usuario', 'Área', 'Ubicación', 'Estado', 'Observaciones']];
             const rows = items.map(d => [
                 d.Folio || '',
                 d.Tipo || '',
@@ -2974,7 +2975,8 @@ body::before {
                 (d.UsuarioAsignado || '').slice(0, 18),
                 (d.Area || '').slice(0, 15),
                 (d.Ubicacion || '').slice(0, 15),
-                d.Estado || ''
+                d.Estado || '',
+                (d.Observaciones || '').slice(0, 80)
             ]);
 
             doc.autoTable({
@@ -3000,7 +3002,8 @@ body::before {
                 alternateRowStyles: { fillColor: [245, 248, 255] },
                 columnStyles: {
                     0: { cellWidth: 22, fontStyle: 'bold', textColor: [0, 102, 255] },
-                    11: { cellWidth: 24, fontStyle: 'bold', halign: 'center' }
+                    11: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+                    12: { cellWidth: 38, fontStyle: 'normal', textColor: [71, 85, 105] }
                 },
                 didParseCell: function (data) {
                     if (data.section === 'body' && data.column.index === 11) {
@@ -3397,7 +3400,7 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             return;
         }
         await sincronizar();
-        console.log('📦 Inventario · v3.0 · PDF profesional con filtros combinables (KPI + Gráficos + Resúmenes + Detalle)');
+        console.log('📦 Inventario · v3.1 · PDF profesional con filtros combinables + columna Observaciones en detalle');
     })();
 
 })();
