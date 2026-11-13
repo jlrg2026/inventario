@@ -680,6 +680,83 @@ body::before {
 .template-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ============================================================
+   PDF MODAL - FILTROS AVANZADOS
+   ============================================================ */
+.pdf-section {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--border-color);
+}
+.pdf-section:last-of-type { border-bottom: none; }
+.pdf-section-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pdf-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    background: var(--bg-input);
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+}
+.checkbox-item {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    text-transform: none !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    cursor: pointer;
+    letter-spacing: 0 !important;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background .2s;
+}
+.checkbox-item:hover { background: rgba(0,102,255,.06); }
+.checkbox-item input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--accent);
+    padding: 0 !important;
+    flex-shrink: 0;
+}
+
+.pdf-info-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(0,102,255,.08), rgba(0,163,255,.06));
+    border: 1px solid rgba(0,102,255,.2);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+.pdf-info-banner .icon { color: var(--accent); flex-shrink: 0; }
+.pdf-info-banner strong { color: var(--accent); font-weight: 800; }
+
+/* ============================================================
    EMPTY / LOADING
    ============================================================ */
 .empty-state {
@@ -760,6 +837,9 @@ body::before {
         <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
         <symbol id="i-file-down" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></symbol>
         <symbol id="i-file-x" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9.5 12.5l5 5M14.5 12.5l-5 5"/></symbol>
+        <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+        <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+        <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
     </defs>
 </svg>
 
@@ -945,7 +1025,6 @@ body::before {
                     <span class="error-msg">Campo obligatorio</span>
                 </div>
 
-                <!-- NUEVOS CAMPOS AQUÍ -->
                 <div class="form-group">
                     <label>IMEI <span class="required">*</span></label>
                     <input type="text" id="imei" placeholder="Ej: 123456789012345" autocomplete="off">
@@ -970,7 +1049,6 @@ body::before {
                     </select>
                     <span class="error-msg">Campo obligatorio</span>
                 </div>
-                <!-- FIN NUEVOS CAMPOS -->
 
                 <div class="form-group">
                     <label>Color <span class="required">*</span></label>
@@ -1269,7 +1347,6 @@ body::before {
                     <input type="text" id="editNumSerie" autocomplete="off">
                 </div>
 
-                <!-- NUEVOS CAMPOS EN MODAL EDICIÓN -->
                 <div class="form-group">
                     <label>IMEI</label>
                     <input type="text" id="editImei" autocomplete="off">
@@ -1291,7 +1368,6 @@ body::before {
                         <option value="Virgin Mobile">Virgin Mobile</option>
                     </select>
                 </div>
-                <!-- FIN NUEVOS CAMPOS -->
 
                 <div class="form-group">
                     <label>Color</label>
@@ -1480,35 +1556,108 @@ body::before {
     </div>
 </div>
 
-<!-- ===== MODAL FILTRO PDF (NUEVO) ===== -->
+<!-- ===== MODAL REPORTE PDF (AVANZADO) ===== -->
 <div class="modal-overlay" id="modalPdfFiltro">
     <div class="modal">
         <div class="modal-header">
             <h3>
                 <svg class="icon"><use href="#i-file-down"/></svg>
-                Reporte PDF · <span>Filtro</span>
+                Reporte PDF · <span>Configuración</span>
             </h3>
             <button class="modal-close" id="modalPdfCerrar" aria-label="Cerrar">&times;</button>
         </div>
 
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Filtrar por</label>
-                <select id="pdfCriterio">
-                    <option value="">Sin filtro (todos)</option>
-                    <option value="Tipo">Tipo</option>
-                    <option value="Estado">Estado</option>
-                    <option value="Area">Área</option>
-                    <option value="Ubicacion">Ubicación</option>
-                    <option value="Modelo">Modelo</option>
-                </select>
-            </div>
+        <div class="pdf-info-banner">
+            <svg class="icon"><use href="#i-info"/></svg>
+            <span>Combina cualquier filtro para generar un reporte a la medida. El reporte incluye <strong>portada, KPIs, gráficos y tablas resumen</strong>.</span>
+        </div>
 
+        <!-- Búsqueda general -->
+        <div class="pdf-section">
+            <div class="pdf-section-title">
+                <svg class="icon icon-sm"><use href="#i-search"/></svg>
+                Búsqueda general
+            </div>
             <div class="form-group">
-                <label>Valor</label>
-                <select id="pdfValor" disabled>
-                    <option value="">-- Selecciona un criterio --</option>
-                </select>
+                <input type="text" id="pdfSearch" placeholder="Folio, serie, usuario, modelo, IMEI..." autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Filtros específicos -->
+        <div class="pdf-section">
+            <div class="pdf-section-title">
+                <svg class="icon icon-sm"><use href="#i-filter"/></svg>
+                Filtros específicos (combinables)
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="pdfTipo"><option value="">Todos</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="pdfEstado"><option value="">Todos</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Marca</label>
+                    <select id="pdfMarca"><option value="">Todas</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select id="pdfProveedor"><option value="">Todos</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Área</label>
+                    <select id="pdfArea"><option value="">Todas</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Ubicación</label>
+                    <select id="pdfUbicacion"><option value="">Todas</option></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rango de fechas -->
+        <div class="pdf-section">
+            <div class="pdf-section-title">
+                <svg class="icon icon-sm"><use href="#i-calendar"/></svg>
+                Rango de fechas (asignación)
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Desde</label>
+                    <input type="date" id="pdfFechaDesde">
+                </div>
+                <div class="form-group">
+                    <label>Hasta</label>
+                    <input type="date" id="pdfFechaHasta">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido del reporte -->
+        <div class="pdf-section">
+            <div class="pdf-section-title">
+                <svg class="icon icon-sm"><use href="#i-clipboard"/></svg>
+                Contenido del reporte
+            </div>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" id="pdfIncluirKpis" checked>
+                    KPIs / Resumen
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="pdfIncluirGraficos" checked>
+                    Gráficos
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="pdfIncluirResumen" checked>
+                    Tablas resumen
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="pdfIncluirDetalle" checked>
+                    Detalle completo
+                </label>
             </div>
         </div>
 
@@ -1748,29 +1897,13 @@ body::before {
     editEstadoSelect.addEventListener('change', e => toggleEditCondFields(e.target.value));
 
     // ============================================================
-    // VALIDACIÓN (TODOS LOS CAMPOS OBLIGATORIOS)
+    // VALIDACIÓN
     // ============================================================
-    // IDs de todos los campos obligatorios del formulario "Nuevo Dispositivo"
     const CAMPOS_OBLIGATORIOS = [
-        'tipoDispositivo',
-        'estado',
-        'marca',
-        'modelo',
-        'numSerie',
-        'imei',
-        'numeroCelular',
-        'proveedor',
-        'color',
-        'capacidad',
-        'sistemaOperativo',
-        'direccionMAC',
-        'direccionIP',
-        'udid',
-        'usuarioAsignado',
-        'emailCloud',
-        'area',
-        'ubicacion',
-        'observaciones'
+        'tipoDispositivo', 'estado', 'marca', 'modelo', 'numSerie',
+        'imei', 'numeroCelular', 'proveedor', 'color', 'capacidad',
+        'sistemaOperativo', 'direccionMAC', 'direccionIP', 'udid',
+        'usuarioAsignado', 'emailCloud', 'area', 'ubicacion', 'observaciones'
     ];
 
     function validateForm() {
@@ -1792,7 +1925,6 @@ body::before {
             }
         });
 
-        // Si el estado es Asignado, la fecha es obligatoria; si es Dado de baja, también
         const estado = $('estado').value;
         if (estado === 'Asignado') {
             const f = $('fechaAsignacion');
@@ -1825,7 +1957,6 @@ body::before {
         return ok;
     }
 
-    // Limpia el estado de error al escribir/cambiar en cualquier campo obligatorio
     CAMPOS_OBLIGATORIOS.forEach(id => {
         const el = $(id);
         if (!el) return;
@@ -2074,7 +2205,6 @@ body::before {
                 </div>`;
         }).join('');
 
-        // Guardar cambio rápido
         listaEl.querySelectorAll('.guardar-cambio').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const card = btn.closest('.device-card');
@@ -2091,7 +2221,6 @@ body::before {
             });
         });
 
-        // Editar todo
         listaEl.querySelectorAll('.editar-todo').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
@@ -2100,7 +2229,6 @@ body::before {
             });
         });
 
-        // Plantilla por item
         listaEl.querySelectorAll('.plantilla-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
@@ -2109,7 +2237,6 @@ body::before {
             });
         });
 
-        // Eliminar
         listaEl.querySelectorAll('.eliminar').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const id = btn.dataset.id;
@@ -2175,7 +2302,6 @@ body::before {
         const colores = ['#0066ff', '#00a3ff', '#00d4ff', '#7c5cff', '#00c896', '#ffb020', '#ff3d5c', '#14b8a6', '#f97316', '#8b5cf6'];
         const t = getThemeColors();
 
-        // Por Tipo
         const tipos = {};
         items.forEach(d => { const k = d.Tipo || 'Desconocido'; tipos[k] = (tipos[k] || 0) + 1; });
         const labelsT = Object.keys(tipos);
@@ -2203,7 +2329,6 @@ body::before {
             }
         });
 
-        // Por Estado
         const orden = ['Asignado', 'En reparación', 'Almacenado', 'Prestado', 'Dado de baja'];
         const counts = {};
         orden.forEach(e => counts[e] = 0);
@@ -2230,7 +2355,6 @@ body::before {
             }
         });
 
-        // Por Área
         const areas = {};
         items.forEach(d => { const k = d.Area || 'Sin asignar'; areas[k] = (areas[k] || 0) + 1; });
         const labelsA = Object.keys(areas);
@@ -2256,7 +2380,6 @@ body::before {
             }
         });
 
-        // Por Ubicación
         const ubic = {};
         items.forEach(d => { const k = d.Ubicacion || 'Sin asignar'; ubic[k] = (ubic[k] || 0) + 1; });
         const labelsU = Object.keys(ubic);
@@ -2284,7 +2407,7 @@ body::before {
     }
 
     // ============================================================
-    // REPORTE PDF (con filtro previo)
+    // HELPERS PDF
     // ============================================================
     function obtenerValoresUnicos(campo) {
         const set = new Set();
@@ -2295,11 +2418,98 @@ body::before {
         return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
     }
 
+    function normalizarFecha(f) {
+        if (!f) return '';
+        const s = String(f).trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+        // dd/mm/yyyy
+        const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+        if (m) {
+            let [, d, mo, y] = m;
+            if (y.length === 2) y = '20' + y;
+            return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        }
+        const dd = new Date(s);
+        if (!isNaN(dd.getTime())) {
+            const yy = dd.getFullYear();
+            const mm = String(dd.getMonth()+1).padStart(2,'0');
+            const ddd = String(dd.getDate()).padStart(2,'0');
+            return `${yy}-${mm}-${ddd}`;
+        }
+        return '';
+    }
+
+    // Renderiza un chart a imagen (dataURL PNG)
+    function renderChartImage(config, width, height) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.cssText = 'position:absolute;left:-9999px;top:-9999px';
+            document.body.appendChild(canvas);
+
+            config.options = config.options || {};
+            config.options.animation = false;
+            config.options.responsive = false;
+            config.options.maintainAspectRatio = false;
+
+            let chart;
+            try {
+                chart = new Chart(canvas, config);
+            } catch (e) {
+                console.error('Chart create error', e);
+                try { document.body.removeChild(canvas); } catch(_) {}
+                return resolve(null);
+            }
+
+            // Esperamos un tick para asegurar render
+            setTimeout(() => {
+                try {
+                    const dataUrl = canvas.toDataURL('image/png', 1.0);
+                    chart.destroy();
+                    document.body.removeChild(canvas);
+                    resolve(dataUrl);
+                } catch (e) {
+                    console.error('Chart render error', e);
+                    try { chart.destroy(); } catch(_) {}
+                    try { document.body.removeChild(canvas); } catch(_) {}
+                    resolve(null);
+                }
+            }, 80);
+        });
+    }
+
+    // ============================================================
+    // MODAL PDF - ABRIR / CERRAR
+    // ============================================================
     function abrirModalPdfFiltro() {
-        $('pdfCriterio').value = '';
-        const valSel = $('pdfValor');
-        valSel.innerHTML = '<option value="">-- Selecciona un criterio --</option>';
-        valSel.disabled = true;
+        // Poblar dropdowns con valores únicos
+        const mapaCampos = {
+            pdfTipo: 'Tipo',
+            pdfEstado: 'Estado',
+            pdfMarca: 'Marca',
+            pdfProveedor: 'Proveedor',
+            pdfArea: 'Area',
+            pdfUbicacion: 'Ubicacion'
+        };
+        Object.entries(mapaCampos).forEach(([id, field]) => {
+            const sel = $(id);
+            const etiquetaBase = sel.options[0].textContent;
+            const valores = obtenerValoresUnicos(field);
+            sel.innerHTML = `<option value="">${etiquetaBase}</option>` +
+                valores.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${String(v)}</option>`).join('');
+        });
+
+        // Reset
+        $('pdfSearch').value = '';
+        $('pdfFechaDesde').value = '';
+        $('pdfFechaHasta').value = '';
+        ['pdfTipo','pdfEstado','pdfMarca','pdfProveedor','pdfArea','pdfUbicacion'].forEach(id => $(id).value = '');
+        $('pdfIncluirKpis').checked = true;
+        $('pdfIncluirGraficos').checked = true;
+        $('pdfIncluirResumen').checked = true;
+        $('pdfIncluirDetalle').checked = true;
+
         $('modalPdfFiltro').classList.add('active');
         document.body.style.overflow = 'hidden';
     }
@@ -2316,170 +2526,515 @@ body::before {
         if (e.target === $('modalPdfFiltro')) cerrarModalPdfFiltro();
     });
 
-    $('pdfCriterio').addEventListener('change', e => {
-        const campo = e.target.value;
-        const valSel = $('pdfValor');
-        if (!campo) {
-            valSel.innerHTML = '<option value="">-- Selecciona un criterio --</option>';
-            valSel.disabled = true;
-            return;
-        }
-        const valores = obtenerValoresUnicos(campo);
-        valSel.innerHTML = '<option value="">-- Todos --</option>' +
-            valores.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${String(v)}</option>`).join('');
-        valSel.disabled = false;
-    });
+    // ============================================================
+    // GENERAR PDF - BOTÓN
+    // ============================================================
+    $('btnGenerarPdfFiltrado').addEventListener('click', async () => {
+        const filtros = {
+            search: $('pdfSearch').value.trim().toLowerCase(),
+            tipo: $('pdfTipo').value,
+            estado: $('pdfEstado').value,
+            marca: $('pdfMarca').value,
+            proveedor: $('pdfProveedor').value,
+            area: $('pdfArea').value,
+            ubicacion: $('pdfUbicacion').value,
+            fechaDesde: $('pdfFechaDesde').value,
+            fechaHasta: $('pdfFechaHasta').value
+        };
 
-    $('btnGenerarPdfFiltrado').addEventListener('click', () => {
-        const campo = $('pdfCriterio').value;
-        const valor = $('pdfValor').value;
+        const opciones = {
+            kpis: $('pdfIncluirKpis').checked,
+            graficos: $('pdfIncluirGraficos').checked,
+            resumen: $('pdfIncluirResumen').checked,
+            detalle: $('pdfIncluirDetalle').checked
+        };
+
+        if (!opciones.kpis && !opciones.graficos && !opciones.resumen && !opciones.detalle) {
+            return showToast('Selecciona al menos una sección del reporte', 'error');
+        }
 
         let items = todosDispositivos.slice();
-        let etiquetaFiltro = 'Sin filtro (todos)';
+        const etiquetas = [];
 
-        if (campo && valor) {
-            items = items.filter(d => String(d[campo] || '').trim() === valor);
-            const nombres = { Tipo: 'Tipo', Estado: 'Estado', Area: 'Área', Ubicacion: 'Ubicación', Modelo: 'Modelo' };
-            etiquetaFiltro = `${nombres[campo] || campo}: ${valor}`;
-        } else if (campo && !valor) {
-            const nombres = { Tipo: 'Tipo', Estado: 'Estado', Area: 'Área', Ubicacion: 'Ubicación', Modelo: 'Modelo' };
-            etiquetaFiltro = `${nombres[campo] || campo}: Todos`;
+        if (filtros.search) {
+            items = items.filter(d => [
+                d.Folio, d.Tipo, d.Marca, d.Modelo, d.NumSerie, d.UsuarioAsignado,
+                d.Area, d.Ubicacion, d.EmailCloud, d.IMEI, d.NumeroCelular, d.Proveedor
+            ].some(v => String(v || '').toLowerCase().includes(filtros.search)));
+            etiquetas.push(`Búsqueda: "${filtros.search}"`);
+        }
+        if (filtros.tipo) { items = items.filter(d => d.Tipo === filtros.tipo); etiquetas.push(`Tipo: ${filtros.tipo}`); }
+        if (filtros.estado) { items = items.filter(d => d.Estado === filtros.estado); etiquetas.push(`Estado: ${filtros.estado}`); }
+        if (filtros.marca) { items = items.filter(d => d.Marca === filtros.marca); etiquetas.push(`Marca: ${filtros.marca}`); }
+        if (filtros.proveedor) { items = items.filter(d => d.Proveedor === filtros.proveedor); etiquetas.push(`Proveedor: ${filtros.proveedor}`); }
+        if (filtros.area) { items = items.filter(d => d.Area === filtros.area); etiquetas.push(`Área: ${filtros.area}`); }
+        if (filtros.ubicacion) { items = items.filter(d => d.Ubicacion === filtros.ubicacion); etiquetas.push(`Ubicación: ${filtros.ubicacion}`); }
+
+        if (filtros.fechaDesde || filtros.fechaHasta) {
+            items = items.filter(d => {
+                const f = normalizarFecha(d.FechaAsignacion);
+                if (!f) return false;
+                if (filtros.fechaDesde && f < filtros.fechaDesde) return false;
+                if (filtros.fechaHasta && f > filtros.fechaHasta) return false;
+                return true;
+            });
+            if (filtros.fechaDesde) etiquetas.push(`Desde: ${filtros.fechaDesde}`);
+            if (filtros.fechaHasta) etiquetas.push(`Hasta: ${filtros.fechaHasta}`);
         }
 
+        const etiquetaFiltro = etiquetas.length ? etiquetas.join(' | ') : 'Todos los dispositivos';
+
         if (!items.length) {
-            return showToast('No hay dispositivos con ese filtro', 'info');
+            return showToast('No hay dispositivos con esos filtros', 'info');
         }
 
         cerrarModalPdfFiltro();
-        generarReportePDF(items, etiquetaFiltro);
+        showToast('Generando reporte PDF...', 'info');
+
+        try {
+            await generarReportePDF(items, etiquetaFiltro, opciones);
+        } catch (e) {
+            console.error(e);
+            showToast('Error al generar PDF: ' + e.message, 'error');
+        }
     });
 
-    function generarReportePDF(items, etiquetaFiltro) {
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    // ============================================================
+    // GENERADOR PDF PROFESIONAL
+    // ============================================================
+    async function generarReportePDF(items, etiquetaFiltro, opciones) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();   // 297
+        const pageH = doc.internal.pageSize.getHeight();  // 210
 
-            const pageW = doc.internal.pageSize.getWidth();
-            const pageH = doc.internal.pageSize.getHeight();
+        const fecha = new Date();
+        const fechaStr = fecha.toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
+        const horaStr = fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
-            // Header con gradiente (simulado con rectángulos)
-            doc.setFillColor(0, 102, 255);
-            doc.rect(0, 0, pageW, 24, 'F');
-            doc.setFillColor(0, 163, 255);
-            doc.rect(0, 0, pageW / 2, 24, 'F');
+        // ======== HEADER ========
+        doc.setFillColor(0, 102, 255);
+        doc.rect(0, 0, pageW, 32, 'F');
+        doc.setFillColor(0, 163, 255);
+        doc.rect(0, 0, pageW * 0.5, 32, 'F');
 
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.setFont(undefined, 'bold');
-            doc.text('REPORTE DE INVENTARIO', 14, 12);
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
-            doc.text('Dispositivos · Sistema de Gestión', 14, 18);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont(undefined, 'bold');
+        doc.text('REPORTE DE INVENTARIO', 14, 14);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text('Sistema de Gestión de Dispositivos', 14, 21);
+        doc.setFontSize(8);
+        doc.text('Generado: ' + fechaStr + ' · ' + horaStr, 14, 28);
 
-            // Fecha
-            const hoy = new Date();
-            const fecha = hoy.toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
-            const hora = hoy.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-            doc.setFontSize(9);
-            doc.text(`Generado: ${fecha} ${hora}`, pageW - 14, 12, { align: 'right' });
-            doc.text(`Total: ${items.length} dispositivos`, pageW - 14, 18, { align: 'right' });
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('Total registros: ' + items.length, pageW - 14, 14, { align: 'right' });
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+        doc.text('Filtro: ' + etiquetaFiltro, pageW - 14, 21, { align: 'right' });
 
-            // Filtro aplicado
-            doc.setTextColor(10, 22, 40);
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'bold');
-            doc.text('Resumen por estado', 14, 34);
+        // Barra info
+        doc.setFillColor(230, 240, 255);
+        doc.rect(0, 32, pageW, 8, 'F');
+        doc.setTextColor(0, 102, 255);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.text('DOCUMENTO GENERADO AUTOMÁTICAMENTE', 14, 37.5);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(71, 85, 105);
 
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'normal');
-            doc.setTextColor(71, 85, 105);
-            doc.text(`Filtro aplicado → ${etiquetaFiltro}`, 14, 40);
+        let y = 46;
 
-            const estados = ['Asignado', 'En reparación', 'Almacenado', 'Prestado', 'Dado de baja'];
-            const counts = {};
-            estados.forEach(e => counts[e] = 0);
-            items.forEach(d => { if (counts[d.Estado] !== undefined) counts[d.Estado]++; });
+        // ======== KPIs ========
+        const estadoLista = ['Asignado', 'En reparación', 'Almacenado', 'Prestado', 'Dado de baja'];
+        const counts = {};
+        estadoLista.forEach(e => counts[e] = 0);
+        items.forEach(d => { if (counts[d.Estado] !== undefined) counts[d.Estado]++; });
 
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'normal');
+        if (opciones.kpis) {
+            const kpis = [
+                { nombre: 'Total', valor: items.length, color: [0, 102, 255] },
+                { nombre: 'Asignados', valor: counts['Asignado'], color: [0, 163, 255] },
+                { nombre: 'En Reparación', valor: counts['En reparación'], color: [255, 61, 92] },
+                { nombre: 'Almacenados', valor: counts['Almacenado'], color: [255, 176, 32] },
+                { nombre: 'Prestados', valor: counts['Prestado'], color: [124, 92, 255] },
+                { nombre: 'Dados de Baja', valor: counts['Dado de baja'], color: [107, 114, 128] }
+            ];
+
+            const cardW = (pageW - 28 - 5 * 4) / 6;
+            const cardH = 22;
             let xPos = 14;
-            estados.forEach(e => {
-                doc.setFillColor(230, 240, 255);
-                doc.roundedRect(xPos, 44, 42, 12, 2, 2, 'F');
-                doc.setTextColor(0, 102, 255);
+
+            kpis.forEach(kpi => {
+                doc.setFillColor(245, 248, 255);
+                doc.roundedRect(xPos, y, cardW, cardH, 2, 2, 'F');
+
+                // Barra color
+                doc.setFillColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+                doc.rect(xPos, y, 2, cardH, 'F');
+
+                doc.setTextColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+                doc.setFontSize(16);
                 doc.setFont(undefined, 'bold');
-                doc.setFontSize(13);
-                doc.text(String(counts[e]), xPos + 21, 50, { align: 'center' });
+                doc.text(String(kpi.valor), xPos + cardW / 2, y + 11, { align: 'center' });
+
                 doc.setFontSize(7);
                 doc.setFont(undefined, 'normal');
                 doc.setTextColor(71, 85, 105);
-                doc.text(e.toUpperCase(), xPos + 21, 54, { align: 'center' });
-                xPos += 45;
+                doc.text(kpi.nombre.toUpperCase(), xPos + cardW / 2, y + 17, { align: 'center' });
+
+                xPos += cardW + 4;
             });
 
-            // Tabla (con columna "Número celular" después de "Serie")
-            const headers = [['Folio', 'Tipo', 'Marca', 'Modelo', 'Serie', 'Número celular', 'Usuario', 'Área', 'Ubicación', 'Estado']];
+            y += cardH + 8;
+        }
+
+        // ======== GRÁFICOS ========
+        // Preparar datos
+        const tipos = {};
+        items.forEach(d => { const k = d.Tipo || 'Desconocido'; tipos[k] = (tipos[k] || 0) + 1; });
+        const areas = {};
+        items.forEach(d => { const k = d.Area || 'Sin asignar'; areas[k] = (areas[k] || 0) + 1; });
+        const ubic = {};
+        items.forEach(d => { const k = d.Ubicacion || 'Sin asignar'; ubic[k] = (ubic[k] || 0) + 1; });
+
+        if (opciones.graficos) {
+            const chartW = (pageW - 28 - 6) / 2;
+            const chartH = chartW * 0.52;
+
+            // Fila 1: Tipo + Estado
+            const chartTipoImg = await renderChartImage({
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(tipos).length ? Object.keys(tipos) : ['Sin datos'],
+                    datasets: [{
+                        data: Object.keys(tipos).length ? Object.values(tipos) : [1],
+                        backgroundColor: ['#0066ff', '#00a3ff', '#00d4ff', '#7c5cff', '#00c896', '#ffb020', '#ff3d5c', '#14b8a6', '#f97316', '#8b5cf6'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { size: 11, weight: '600' }, color: '#475569', boxWidth: 12, padding: 8 } },
+                        title: { display: true, text: 'Distribución por Tipo', font: { size: 13, weight: 'bold' }, color: '#0a1628', padding: { bottom: 10 } }
+                    }
+                }
+            }, 600, 320);
+
+            const chartEstadoImg = await renderChartImage({
+                type: 'bar',
+                data: {
+                    labels: estadoLista,
+                    datasets: [{
+                        data: estadoLista.map(e => counts[e]),
+                        backgroundColor: ['#00a3ff', '#ff3d5c', '#ffb020', '#7c5cff', '#6b7280'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Distribución por Estado', font: { size: 13, weight: 'bold' }, color: '#0a1628', padding: { bottom: 10 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: '#8ea0b8', font: { size: 10 } }, grid: { color: '#dde7f5' } },
+                        x: { ticks: { color: '#475569', font: { size: 9 } }, grid: { display: false } }
+                    }
+                }
+            }, 600, 320);
+
+            if (chartTipoImg) doc.addImage(chartTipoImg, 'PNG', 14, y, chartW, chartH);
+            if (chartEstadoImg) doc.addImage(chartEstadoImg, 'PNG', 14 + chartW + 6, y, chartW, chartH);
+
+            y += chartH + 6;
+
+            // Fila 2: Área + Ubicación
+            if (y + chartH + 30 > pageH - 20) {
+                doc.addPage();
+                y = 20;
+                // repetir header mini
+                doc.setFillColor(0, 102, 255);
+                doc.rect(0, 0, pageW, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('REPORTE DE INVENTARIO · Continuación', 14, 6.5);
+                y = 18;
+            }
+
+            const areasLabels = Object.keys(areas).sort((a, b) => areas[b] - areas[a]);
+            const chartAreaImg = await renderChartImage({
+                type: 'bar',
+                data: {
+                    labels: areasLabels.length ? areasLabels : ['Sin datos'],
+                    datasets: [{
+                        data: areasLabels.length ? areasLabels.map(k => areas[k]) : [1],
+                        backgroundColor: '#0066ff',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Distribución por Área', font: { size: 13, weight: 'bold' }, color: '#0a1628', padding: { bottom: 10 } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { stepSize: 1, color: '#8ea0b8', font: { size: 10 } }, grid: { color: '#dde7f5' } },
+                        y: { ticks: { color: '#475569', font: { size: 9 } }, grid: { display: false } }
+                    }
+                }
+            }, 600, 320);
+
+            const ubicLabels = Object.keys(ubic).sort((a, b) => ubic[b] - ubic[a]);
+            const chartUbicacionImg = await renderChartImage({
+                type: 'bar',
+                data: {
+                    labels: ubicLabels.length ? ubicLabels : ['Sin datos'],
+                    datasets: [{
+                        data: ubicLabels.length ? ubicLabels.map(k => ubic[k]) : [1],
+                        backgroundColor: '#00a3ff',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Distribución por Ubicación', font: { size: 13, weight: 'bold' }, color: '#0a1628', padding: { bottom: 10 } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { stepSize: 1, color: '#8ea0b8', font: { size: 10 } }, grid: { color: '#dde7f5' } },
+                        y: { ticks: { color: '#475569', font: { size: 9 } }, grid: { display: false } }
+                    }
+                }
+            }, 600, 320);
+
+            if (chartAreaImg) doc.addImage(chartAreaImg, 'PNG', 14, y, chartW, chartH);
+            if (chartUbicacionImg) doc.addImage(chartUbicacionImg, 'PNG', 14 + chartW + 6, y, chartW, chartH);
+
+            y += chartH + 8;
+        }
+
+        // ======== TABLAS RESUMEN ========
+        if (opciones.resumen) {
+            if (y + 60 > pageH - 20) {
+                doc.addPage();
+                doc.setFillColor(0, 102, 255);
+                doc.rect(0, 0, pageW, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('REPORTE DE INVENTARIO · Continuación', 14, 6.5);
+                y = 18;
+            }
+
+            // Estado (izquierda)
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(10, 22, 40);
+            doc.text('Resumen por Estado', 14, y);
+
+            const estadoRows = estadoLista.map(e => [
+                e,
+                String(counts[e]),
+                items.length ? ((counts[e] / items.length) * 100).toFixed(1) + '%' : '0%'
+            ]);
+
+            doc.autoTable({
+                head: [['Estado', 'Cantidad', 'Porcentaje']],
+                body: estadoRows,
+                startY: y + 3,
+                theme: 'grid',
+                margin: { left: 14, right: pageW / 2 + 3 },
+                styles: { fontSize: 8, cellPadding: 2, textColor: [30, 41, 59], lineColor: [221, 231, 245] },
+                headStyles: { fillColor: [0, 163, 255], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+                alternateRowStyles: { fillColor: [245, 248, 255] }
+            });
+            const estadoFinalY = doc.lastAutoTable.finalY;
+
+            // Tipo (derecha)
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(10, 22, 40);
+            doc.text('Resumen por Tipo', pageW / 2 + 5, y);
+
+            const tiposRows = Object.entries(tipos).sort((a, b) => b[1] - a[1]).map(([tipo, count]) => [
+                tipo,
+                String(count),
+                items.length ? ((count / items.length) * 100).toFixed(1) + '%' : '0%'
+            ]);
+
+            doc.autoTable({
+                head: [['Tipo', 'Cantidad', 'Porcentaje']],
+                body: tiposRows,
+                startY: y + 3,
+                theme: 'grid',
+                margin: { left: pageW / 2 + 5, right: 14 },
+                styles: { fontSize: 8, cellPadding: 2, textColor: [30, 41, 59], lineColor: [221, 231, 245] },
+                headStyles: { fillColor: [0, 102, 255], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+                alternateRowStyles: { fillColor: [245, 248, 255] }
+            });
+            const tipoFinalY = doc.lastAutoTable.finalY;
+
+            y = Math.max(estadoFinalY, tipoFinalY) + 8;
+
+            // Área / Ubicación
+            if (y + 40 > pageH - 20) {
+                doc.addPage();
+                doc.setFillColor(0, 102, 255);
+                doc.rect(0, 0, pageW, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('REPORTE DE INVENTARIO · Continuación', 14, 6.5);
+                y = 18;
+            }
+
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(10, 22, 40);
+            doc.text('Resumen por Área', 14, y);
+
+            const areasRows = Object.entries(areas).sort((a, b) => b[1] - a[1]).map(([area, count]) => [
+                area,
+                String(count),
+                items.length ? ((count / items.length) * 100).toFixed(1) + '%' : '0%'
+            ]);
+
+            doc.autoTable({
+                head: [['Área', 'Cantidad', 'Porcentaje']],
+                body: areasRows,
+                startY: y + 3,
+                theme: 'grid',
+                margin: { left: 14, right: pageW / 2 + 3 },
+                styles: { fontSize: 8, cellPadding: 2, textColor: [30, 41, 59], lineColor: [221, 231, 245] },
+                headStyles: { fillColor: [124, 92, 255], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+                alternateRowStyles: { fillColor: [245, 248, 255] }
+            });
+            const areasFinalY = doc.lastAutoTable.finalY;
+
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(10, 22, 40);
+            doc.text('Resumen por Ubicación', pageW / 2 + 5, y);
+
+            const ubicRows = Object.entries(ubic).sort((a, b) => b[1] - a[1]).map(([u, count]) => [
+                u,
+                String(count),
+                items.length ? ((count / items.length) * 100).toFixed(1) + '%' : '0%'
+            ]);
+
+            doc.autoTable({
+                head: [['Ubicación', 'Cantidad', 'Porcentaje']],
+                body: ubicRows,
+                startY: y + 3,
+                theme: 'grid',
+                margin: { left: pageW / 2 + 5, right: 14 },
+                styles: { fontSize: 8, cellPadding: 2, textColor: [30, 41, 59], lineColor: [221, 231, 245] },
+                headStyles: { fillColor: [0, 200, 150], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+                alternateRowStyles: { fillColor: [245, 248, 255] }
+            });
+            const ubicFinalY = doc.lastAutoTable.finalY;
+
+            y = Math.max(areasFinalY, ubicFinalY) + 8;
+        }
+
+        // ======== DETALLE COMPLETO ========
+        if (opciones.detalle) {
+            doc.addPage();
+            y = 0;
+
+            // Header en página de detalle
+            doc.setFillColor(0, 102, 255);
+            doc.rect(0, 0, pageW, 12, 'F');
+            doc.setFillColor(0, 163, 255);
+            doc.rect(0, 0, pageW * 0.4, 12, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('DETALLE COMPLETO DE DISPOSITIVOS', 14, 8);
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Total: ${items.length} · ${etiquetaFiltro}`, pageW - 14, 8, { align: 'right' });
+
+            const headers = [['Folio', 'Tipo', 'Marca', 'Modelo', 'Serie', 'IMEI', 'Núm. Cel', 'Proveedor', 'Usuario', 'Área', 'Ubicación', 'Estado']];
             const rows = items.map(d => [
                 d.Folio || '',
                 d.Tipo || '',
                 d.Marca || '',
-                (d.Modelo || '').slice(0, 25),
+                (d.Modelo || '').slice(0, 20),
                 (d.NumSerie || '').slice(0, 18),
+                (d.IMEI || '').slice(0, 16),
                 d.NumeroCelular || '',
-                (d.UsuarioAsignado || '').slice(0, 20),
-                (d.Area || '').slice(0, 18),
-                (d.Ubicacion || '').slice(0, 18),
+                (d.Proveedor || '').slice(0, 12),
+                (d.UsuarioAsignado || '').slice(0, 18),
+                (d.Area || '').slice(0, 15),
+                (d.Ubicacion || '').slice(0, 15),
                 d.Estado || ''
             ]);
 
             doc.autoTable({
                 head: headers,
                 body: rows,
-                startY: 62,
+                startY: 16,
                 theme: 'grid',
                 styles: {
-                    fontSize: 8,
-                    cellPadding: 2,
+                    fontSize: 6.5,
+                    cellPadding: 1.5,
                     textColor: [30, 41, 59],
                     lineColor: [221, 231, 245],
-                    lineWidth: 0.2
+                    lineWidth: 0.15,
+                    overflow: 'linebreak'
                 },
                 headStyles: {
                     fillColor: [0, 102, 255],
                     textColor: [255, 255, 255],
                     fontStyle: 'bold',
-                    fontSize: 8.5
+                    fontSize: 7,
+                    halign: 'center'
                 },
                 alternateRowStyles: { fillColor: [245, 248, 255] },
                 columnStyles: {
                     0: { cellWidth: 22, fontStyle: 'bold', textColor: [0, 102, 255] },
-                    9: { cellWidth: 26, fontStyle: 'bold' }
+                    11: { cellWidth: 24, fontStyle: 'bold', halign: 'center' }
                 },
-                didDrawPage: (data) => {
+                didParseCell: function (data) {
+                    if (data.section === 'body' && data.column.index === 11) {
+                        const v = data.cell.raw;
+                        if (v === 'Asignado') data.cell.styles.textColor = [0, 102, 255];
+                        else if (v === 'En reparación') data.cell.styles.textColor = [225, 29, 72];
+                        else if (v === 'Almacenado') data.cell.styles.textColor = [180, 83, 9];
+                        else if (v === 'Prestado') data.cell.styles.textColor = [91, 61, 245];
+                        else if (v === 'Dado de baja') data.cell.styles.textColor = [55, 65, 81];
+                    }
+                },
+                didDrawPage: function () {
                     const pageCount = doc.internal.getNumberOfPages();
                     const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
-                    doc.setFontSize(8);
+                    doc.setFontSize(7);
                     doc.setTextColor(142, 160, 184);
                     doc.text(
-                        `Página ${pageNum} de ${pageCount} · Sistema de Inventario`,
+                        `Sistema de Inventario · Página ${pageNum} de ${pageCount} · Generado: ${fechaStr} ${horaStr}`,
                         pageW / 2,
-                        pageH - 8,
+                        pageH - 6,
                         { align: 'center' }
                     );
                 }
             });
-
-            const sufijo = etiquetaFiltro && etiquetaFiltro !== 'Sin filtro (todos)'
-                ? '_' + etiquetaFiltro.replace(/[^\w\d]+/g, '_').slice(0, 30)
-                : '';
-            const nombre = `reporte_inventario_${new Date().toISOString().slice(0, 10)}${sufijo}.pdf`;
-            doc.save(nombre);
-            showToast('Reporte PDF descargado', 'success');
-            notificar('Reporte PDF generado', `${items.length} dispositivos incluidos`);
-        } catch (e) {
-            console.error(e);
-            showToast('Error al generar PDF: ' + e.message, 'error');
         }
+
+        // Nombre de archivo
+        const sufijo = etiquetaFiltro && etiquetaFiltro !== 'Todos los dispositivos'
+            ? '_' + etiquetaFiltro.replace(/[^\w\d]+/g, '_').slice(0, 40)
+            : '';
+        const nombre = `reporte_inventario_${new Date().toISOString().slice(0, 10)}${sufijo}.pdf`;
+        doc.save(nombre);
+        showToast('Reporte PDF descargado', 'success');
+        notificar('Reporte PDF generado', `${items.length} dispositivos incluidos`);
     }
 
     // ============================================================
@@ -2842,7 +3397,7 @@ Folio: ${d.Folio || 'INV-______'} · Generado: ${hoy}
             return;
         }
         await sincronizar();
-        console.log('📦 Inventario cargado · Azul Tecnológico · v2.4 (PDF con filtro por Tipo/Estado/Área/Ubicación/Modelo)');
+        console.log('📦 Inventario · v3.0 · PDF profesional con filtros combinables (KPI + Gráficos + Resúmenes + Detalle)');
     })();
 
 })();
