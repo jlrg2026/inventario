@@ -129,14 +129,13 @@ const F=[['tipoDispositivo','Tipo','Tipo de dispositivo','Tipo'],['estado','Esta
 ['proveedor','Proveedor','Proveedor','Proveedor'],['color','Color','Color','Color'],['capacidad','Capacidad','Capacidad','Capacidad'],['sistemaOperativo','SistemaOperativo','Sistema operativo','SO'],
 ['direccionMAC','DireccionMAC','Dirección MAC'],['direccionIP','DireccionIP','Dirección IP'],['udid','UDID','UDID'],['usuarioAsignado','UsuarioAsignado','Usuario asignado'],['emailCloud','EmailCloud','Email / ID Cloud'],
 ['area','Area','Área','Area'],['ubicacion','Ubicacion','Ubicación','Ubicacion'],['observaciones','Observaciones','Observaciones','ta']];
-const IM={numeroCelular:'tel',emailCloud:'email',direccionIP:'decimal'},NOCAP=['direccionMAC','udid','emailCloud'];
+const IM={numeroCelular:'tel',emailCloud:'email'},NOCAP=['direccionMAC','udid','emailCloud'];
 const SIEMPRE=['tipoDispositivo','estado','marca','modelo','numSerie','proveedor','color','capacidad','sistemaOperativo','area','ubicacion'];
 const RED=['Laptop','Mac','All in One','Servidor','Router Telmex','Router Total Play'];
-const REQ_TIPO={imei:['iPhone','Android','iPad'],numeroCelular:['iPhone','Android'],udid:['iPad','iPhone','Mac'],direccionMAC:RED,direccionIP:RED};
-const UNICOS=['numSerie','imei','direccionMAC','udid'];
+const REQ_TIPO={numeroCelular:['iPhone','Android'],udid:['iPad','iPhone','Mac']};
+const UNICOS=['numSerie','udid'];
 const luhn=s=>{let t=0;[...s].reverse().forEach((c,i)=>{let n=+c;if(i%2){n*=2;if(n>9)n-=9}t+=n});return t%10===0};
-const FMT={imei:v=>/^\d{15}$/.test(v)&&luhn(v)||'IMEI de 15 dígitos válido',numeroCelular:v=>/^\d{10}$/.test(v.replace(/\D/g,''))||'Debe tener 10 dígitos',
-direccionMAC:v=>/^([0-9A-F]{2}[:-]){5}[0-9A-F]{2}$/i.test(v)||'Formato 00:1A:2B:3C:4D:5E',direccionIP:v=>/^((25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(25[0-5]|2[0-4]\d|1?\d?\d)$/.test(v)||'IP inválida',emailCloud:v=>/^\S+@\S+\.\S+$/.test(v)||'Correo inválido'};
+const FMT={numeroCelular:v=>/^\d{10}$/.test(v.replace(/\D/g,''))||'Debe tener 10 dígitos',emailCloud:v=>/^\S+@\S+\.\S+$/.test(v)||'Correo inválido'};
 const BUSCA=['Folio','Tipo','Marca','Modelo','UsuarioAsignado','NumSerie','UDID','Area','Ubicacion','EmailCloud','IMEI','NumeroCelular','Proveedor'];
 const FILT=[['fTipo','Tipo'],['fEstado','Estado'],['fMarca','Marca'],['fArea','Area'],['fUbic','Ubicacion']];
 const SC={'Asignado':'a','En reparación':'r','Almacenado':'m','Prestado':'p','Dado de baja':'b'};
