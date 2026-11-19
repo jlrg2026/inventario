@@ -302,7 +302,9 @@ $('bTxt').onclick=()=>{const a=document.createElement('a');a.href=URL.createObje
 /* ===== PDF ===== */
 const PF=[['pTipo','Tipo','Tipo'],['pEstado','Estado','Estado'],['pMarca','Marca','Marca'],['pProv','Proveedor','Proveedor'],['pArea','Area','Área'],['pUbic','Ubicacion','Ubicación']];
 const unicos=c=>[...new Set(todos.map(d=>String(d[c]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
-$('bPdf').onclick=()=>{$('pFiltros').innerHTML=PF.map(([id,c,l])=>'<div class="g"><label for="'+id+'">'+l+'</label><select id="'+id+'">'+opts(unicos(c),'Todos')+'</select></div>').join('');
+$('bPdf').onclick=()=>{$('pFiltros').innerHTML=PF.map(([id,c,l])=>id==='pTipo'
+  ?'<div class="g"><label for="'+id+'">'+esc(l)+' <small style="text-transform:none;font-weight:400;font-size:10px;color:var(--tm)">(Ctrl/Cmd o Shift: selección múltiple)</small></label><select id="'+id+'" multiple size="6" style="padding:6px;min-height:140px">'+unicos(c).map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></div>'
+  :'<div class="g"><label for="'+id+'">'+esc(l)+'</label><select id="'+id+'">'+opts(unicos(c),'Todos')+'</select></div>').join('');
  $('pq').value=$('pd').value=$('ph').value='';['ck1','ck2','ck3','ck4'].forEach(i=>$(i).checked=true);abrir('mPdf')};
 function img(type,e,title){const c=document.createElement('canvas');c.width=600;c.height=300;c.style.cssText='position:fixed;left:-9999px';document.body.appendChild(c);const d=type==='doughnut';
  const ch=new Chart(c,{type:d?'doughnut':'bar',data:{labels:e.map(x=>x[0]),datasets:[{data:e.map(x=>x[1]),backgroundColor:e.map((_,i)=>COL[i%COL.length])}]},options:{animation:false,responsive:false,indexAxis:type==='hbar'?'y':'x',plugins:{legend:{display:d,position:'right'},title:{display:true,text:title}}}});
@@ -331,7 +333,15 @@ async function pdf(it,etq,o){await cargarPdf();const {jsPDF}=window.jspdf,doc=ne
 $('bGenPdf').onclick=async()=>{const q=$('pq').value.trim().toLowerCase(),o={kpis:$('ck1').checked,graficos:$('ck2').checked,resumen:$('ck3').checked,detalle:$('ck4').checked},de=$('pd').value,ha=$('ph').value,et=[];
  if(!Object.values(o).some(Boolean))return toast('Selecciona al menos una sección','error');
  let it=todos.filter(d=>!q||BUSCA.some(c=>String(d[c]||'').toLowerCase().includes(q)));if(q)et.push('Búsqueda: "'+q+'"');
- PF.forEach(([id,c,l])=>{const v=$(id).value;if(v){it=it.filter(d=>String(d[c]||'').trim()===v);et.push(l+': '+v)}});
+ PF.forEach(([id,c,l])=>{
+   if(id==='pTipo'){
+     const sel=[...$(id).selectedOptions].map(op=>op.value).filter(Boolean);
+     if(sel.length){it=it.filter(d=>sel.includes(String(d[c]||'').trim()));et.push(l+': '+sel.join(', '))}
+   }else{
+     const v=$(id).value;
+     if(v){it=it.filter(d=>String(d[c]||'').trim()===v);et.push(l+': '+v)}
+   }
+ });
  if(de||ha){it=it.filter(d=>{const f=nf(d.FechaAsignacion);return f&&(!de||f>=de)&&(!ha||f<=ha)});et.push('Asignación '+(de||'…')+' a '+(ha||'…'))}
  if(!it.length)return toast('No hay dispositivos con esos filtros','info');
  cerrar('mPdf');toast('Generando reporte PDF...','info');try{await pdf(it,et.join(' | ')||'Todos los dispositivos',o)}catch(e){console.error(e);toast('Error al generar PDF: '+e.message,'error')}};
