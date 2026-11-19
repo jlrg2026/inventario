@@ -102,6 +102,7 @@ pre{background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:1
 <div class="g" style="margin-bottom:12px"><label for="pq">Búsqueda general</label><input id="pq" placeholder="Folio, serie, usuario, IMEI..."></div>
 <div class="fg" id="pFiltros"></div>
 <div class="fg" style="margin:12px 0"><div class="g"><label for="pd">Asignación desde</label><input type="date" id="pd"></div><div class="g"><label for="ph">Hasta</label><input type="date" id="ph"></div></div>
+<div class="g" style="margin-bottom:12px"><label for="pOrden">Ordenar detalle por</label><select id="pOrden"><option value="f-">Folio (más recientes primero)</option><option value="f+">Folio (más antiguos primero)</option><option value="t">Tipo (A-Z)</option><option value="m">Marca (A-Z)</option><option value="mo">Modelo (A-Z)</option><option value="a">Área (A-Z)</option><option value="u">Usuario asignado (A-Z)</option><option value="e">Estado (A-Z)</option><option value="ub">Ubicación (A-Z)</option></select></div>
 <div class="ck"><label><input type="checkbox" id="ck1" checked>KPIs</label><label><input type="checkbox" id="ck2" checked>Gráficos</label><label><input type="checkbox" id="ck3" checked>Tablas resumen</label><label><input type="checkbox" id="ck4" checked>Detalle completo</label></div>
 <div class="fa"><button class="b bp" id="bGenPdf">Generar PDF</button><button class="b bo" data-close>Cancelar</button></div></div></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -302,10 +303,22 @@ $('bTxt').onclick=()=>{const a=document.createElement('a');a.href=URL.createObje
 /* ===== PDF ===== */
 const PF=[['pTipo','Tipo','Tipo'],['pEstado','Estado','Estado'],['pMarca','Marca','Marca'],['pProv','Proveedor','Proveedor'],['pArea','Area','Área'],['pUbic','Ubicacion','Ubicación']];
 const unicos=c=>[...new Set(todos.map(d=>String(d[c]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+const ORD_DET={
+  'f-':(a,b)=>folioDe(b).localeCompare(folioDe(a),'es',{numeric:true}),
+  'f+':(a,b)=>folioDe(a).localeCompare(folioDe(b),'es',{numeric:true}),
+  't':(a,b)=>String(a.Tipo||'').localeCompare(String(b.Tipo||''),'es'),
+  'm':(a,b)=>String(a.Marca||'').localeCompare(String(b.Marca||''),'es'),
+  'mo':(a,b)=>String(a.Modelo||'').localeCompare(String(b.Modelo||''),'es'),
+  'a':(a,b)=>String(a.Area||'').localeCompare(String(b.Area||''),'es'),
+  'u':(a,b)=>String(a.UsuarioAsignado||'').localeCompare(String(b.UsuarioAsignado||''),'es'),
+  'e':(a,b)=>String(a.Estado||'').localeCompare(String(b.Estado||''),'es'),
+  'ub':(a,b)=>String(a.Ubicacion||'').localeCompare(String(b.Ubicacion||''),'es')
+};
+const ORD_LBL={'f-':'Folio ↓','f+':'Folio ↑','t':'Tipo','m':'Marca','mo':'Modelo','a':'Área','u':'Usuario','e':'Estado','ub':'Ubicación'};
 $('bPdf').onclick=()=>{$('pFiltros').innerHTML=PF.map(([id,c,l])=>id==='pTipo'
   ?'<div class="g"><label for="'+id+'">'+esc(l)+' <small style="text-transform:none;font-weight:400;font-size:10px;color:var(--tm)">(Ctrl/Cmd o Shift: selección múltiple)</small></label><select id="'+id+'" multiple size="6" style="padding:6px;min-height:140px">'+unicos(c).map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></div>'
   :'<div class="g"><label for="'+id+'">'+esc(l)+'</label><select id="'+id+'">'+opts(unicos(c),'Todos')+'</select></div>').join('');
- $('pq').value=$('pd').value=$('ph').value='';['ck1','ck2','ck3','ck4'].forEach(i=>$(i).checked=true);abrir('mPdf')};
+ $('pq').value=$('pd').value=$('ph').value='';$('pOrden').value='f-';['ck1','ck2','ck3','ck4'].forEach(i=>$(i).checked=true);abrir('mPdf')};
 function img(type,e,title){const c=document.createElement('canvas');c.width=600;c.height=300;c.style.cssText='position:fixed;left:-9999px';document.body.appendChild(c);const d=type==='doughnut';
  const ch=new Chart(c,{type:d?'doughnut':'bar',data:{labels:e.map(x=>x[0]),datasets:[{data:e.map(x=>x[1]),backgroundColor:e.map((_,i)=>COL[i%COL.length])}]},options:{animation:false,responsive:false,indexAxis:type==='hbar'?'y':'x',plugins:{legend:{display:d,position:'right'},title:{display:true,text:title}}}});
  const u=c.toDataURL('image/png');ch.destroy();c.remove();return u}
@@ -344,6 +357,8 @@ $('bGenPdf').onclick=async()=>{const q=$('pq').value.trim().toLowerCase(),o={kpi
  });
  if(de||ha){it=it.filter(d=>{const f=nf(d.FechaAsignacion);return f&&(!de||f>=de)&&(!ha||f<=ha)});et.push('Asignación '+(de||'…')+' a '+(ha||'…'))}
  if(!it.length)return toast('No hay dispositivos con esos filtros','info');
+ const ordKey=$('pOrden').value;
+ if(ORD_DET[ordKey]){it=it.slice().sort(ORD_DET[ordKey]);et.push('Orden: '+ORD_LBL[ordKey])}
  cerrar('mPdf');toast('Generando reporte PDF...','info');try{await pdf(it,et.join(' | ')||'Todos los dispositivos',o)}catch(e){console.error(e);toast('Error al generar PDF: '+e.message,'error')}};
 
 /* ===== INIT ===== */
